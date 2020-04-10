@@ -1,0 +1,41 @@
+{
+  "name": "casg",
+  "version": "0.0.1",
+  "description": "Collect Aggregate Share Graphs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stauffenbits/casg.git"
+  },
+  "keywords": [
+    "collect",
+    "aggregate",
+    "share",
+    "graphs"
+  ],
+  "author": "stauffenbits@pm.me",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stauffenbits/casg/issues"
+  },
+  "homepage": "https://github.com/stauffenbits/casg#readme",
+  "dependencies": {
+    "angular": "^1.7.9",
+    "angular-animate": "^1.7.9",
+    "angular-route": "^1.7.9",
+    "angular-sanitize": "^1.7.9",
+    "angular-ui-bootstrap": "^2.5.6",
+    "bootstrap": "^4.4.1",
+    "express": "^4.17.1",
+    "jquery": "^3.4.1",
+    "localforage": "^1.7.3",
+    "openpgp": "^4.10.1",
+    "pegjs": "^0.10.0",
+    "remotestorage-module-documents": "^0.2.1",
+    "remotestorage-widget": "^1.5.1",
+    "remotestoragejs": "^1.2.3"
+  }
+}
