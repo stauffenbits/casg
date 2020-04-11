@@ -103,26 +103,24 @@ var KeyPairs = {
 
         store: function(key){
           console.log('storing ', key.title)
-          return privateClient.storeObject('keypair', key.title, key);
+          return privateClient.storeObject('keypair', `/casg/keypairs/${key.title}`, key);
         },
 
-        list: function(){
+        list: async function(){
           var self = this;
 
-          return privateClient.getListing('/')
-            .then((listing) => {
-              console.log('keypair listing')
-              if(listing){
-                self._removeDirectoryKeysFromListing(listing);
-                return listing;
-              }else{
-                return {};
-              }
-            })
+          var listing = await privateClient.getListing('/casg/keypairs/')
+          console.log('keypair listing', listing);
+          if(listing){
+            self._removeDirectoryKeysFromListing(listing);
+            return listing;
+          }else{
+            return {};
+          }
         },
 
         clear(){
-          this.list().then(listing => {
+          this.list(`/casg/keypairs/`).then(listing => {
             if(listing){
               Object.keys(listing).forEach(li => {
                 privateClient.remove(li);
@@ -132,11 +130,11 @@ var KeyPairs = {
         },
 
         get: function(title){
-          return privateClient.getObject(title);
+          return privateClient.getObject(`/casg/keypairs/${title}`);
         },
 
         remove: function(title){
-          return privateClient.remove(title);
+          return privateClient.remove(`/casg/keypairs/${title}`);
         },
 
         _removeDirectoryKeysFromListing: function(listing) {
@@ -579,7 +577,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     console.log("loading key pairs")
 
     var listing = await $scope.remoteStorage.keypairs.list();
-    console.log('listing: ', listing);
+    console.log('listing', listing);
     for(var keyPath in listing){
       $scope.remoteStorage.keypairs.get(keyPath)
       .then(privateKey => {
