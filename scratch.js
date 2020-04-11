@@ -94,9 +94,9 @@ var KeyPairs = {
     return {
       exports: {
 
-        store: function(key){
+        store: function(name, key) {    
           return privateClient
-            .storeObject('keypair', `/keypairs/${key.title}.keypair`, key)
+            .storeObject('keypair', name, key)
             .then(() => {
               return key;
             })
@@ -116,8 +116,8 @@ var KeyPairs = {
             })
         },
 
-        get: function(title){
-          return privateClient.getObject(title);
+        get: function(path){
+          return privateClient.getObject(path);
         },
 
         remove: function(path){
@@ -148,19 +148,16 @@ var KeyPairs = {
 var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
   // RemoteStorage Variables and Functions
 
-  $scope.keyPaths = [];
-  $scope.keyPairs = new Map();
-
-
-  $scope.privateKeys = {};
-  $scope.storeKeyPair = function(privateKey){
-    $scope.remoteStorage.keypairs.store(privateKey);
-    $scope.privateKeys[privateKey.title] = privateKey;
-    $scope.$apply();
-  }
-
-  $scope.userAddress = null;
   $scope.remoteStorage = new RemoteStorage({modules: [ Graphs, KeyPairs ] });
+
+  $scope.remoteStorage.on('connected', () => {
+    console.debug('connected RemoteStorage');
+
+    $scope.userAddress = $scope.remoteStorage.remote.userAddress;
+    $scope.$apply();
+
+    $scope.loadKeyPairs();
+  });
   
   $scope.remoteStorage.on('network-offline', () => {
     console.debug(`We're offline now.`);
@@ -169,6 +166,12 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
   $scope.remoteStorage.on('network-online', () => {
     console.debug(`Hooray, we're back online.`);
   });
+
+  $scope.remoteStorage.access.claim('keypairs', 'rw');
+  $scope.remoteStorage.access.claim('keys', 'rw');
+  $scope.remoteStorage.access.claim('graphs', 'rw');
+
+  $scope.userAddress = null;
 
   $scope.storageWidget = new Widget($scope.remoteStorage);
   $scope.configureStorage = function(){
@@ -208,57 +211,57 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
 
   // OpenPGP.js Variables and Functions
 
+  $scope.keyPairs = [];
+  $scope.publicKeys = [];
+
   $scope.generateKeyPair = async function(){
-    var confirmation = confirm("Creating a new Key Pair means you will re-encrypt all files and shares. Would you like to continue?")
-    if(!confirmation){
-      return;
+    var pass = prompt("Please enter a passphrase");
+    if($scope.userAddress !== null){
+      // { privateKeyArmored, publicKeyArmored, revocationCertificate }
+      var keyTriple = await openpgp.generateKey({ 
+        curve: 'curve25519',  
+        userIds: [{ 
+          name: $scope.userAddress, 
+          email: $scope.userAddress,
+        }],
+        passphrase: pass
+      });
+
+      console.log('Key pair generated');
+
+      keyTriple.title = `${$scope.userAddress}`;
+
+      $scope.remoteStorage.access.claim('keypairs', 'rw');
+      $scope.remoteStorage.caching.enable('/keypairs/');
+
+      $scope.remoteStorage.keypairs.store(
+        `/keypairs/${$scope.userAddress}.keypair`,
+        keyTriple
+      );
+
+      $scope.loadKeyPairs();
     }
-    
-    var name = prompt("Please enter your name for the key pair: ");
-    if(!name){
-      console.error('aborted');
-      return;
-    }
-
-    var email = prompt("Please enter your email for the key pair: ");
-    if(!email){
-      console.error('aborted');
-      return;
-    }
-
-    var pass = prompt("Please enter a passphrase for the key pair: ")
-    if(!pass){
-      console.error('aborted');
-      return;
-    }
-
-    // { privateKeyArmored, publicKeyArmored, revocationCertificate }
-    var keyTriple = await openpgp.generateKey({ 
-      curve: 'curve25519',  
-      userIds: [{ 
-        name: name,
-        email: email
-      }],
-      passphrase: pass
-    });
-
-    keyTriple.title = `${name} <${email}>`;
-
-    $scope.storeKeyPair(keyTriple);
   }
 
-  $scope.exportKeyPair = function(privateKey){
+  $scope.exportKeyPair = function(path){
+    console.log($scope.keyPairs);
     var link = document.createElement('a');
     
-    link.download = `${privateKey.title}.keypair`;
+    var keyPair = $scope.keyPairs.get(path);
+    link.download = keyPair.title;
 
-    var keyData = JSON.stringify(privateKey);
+    console.log('keyPair found', keyPair.title);
+
+    var keyData = JSON.stringify($scope.keyPairs.get(path));
+    console.log("keyData", keyData);
     var data = `data:text/json;charset=utf-8,${encodeURIComponent(keyData)}`;
     link.href = data;
 
     link.click();
   }
 
+  $scope.keyPaths = [];
+  $scope.keyPairs = new Map();
 
   $scope.loadKeyPairs = async function(){
 
@@ -267,15 +270,17 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
 
     console.log("loading key pairs")
 
+    $scope.remoteStorage.access.claim('keypairs', 'rw');
+    $scope.remoteStorage.caching.enable('/keypairs/');
+
     var listing = await $scope.remoteStorage.keypairs.list();
-    console.log('listing: ', listing);
+    console.log(listing);
     for(var keyPath in listing){
       console.log('keypath', keyPath);
       $scope.keyPaths.push(keyPath.toString());
       
       $scope.remoteStorage.keypairs.get('/keypairs/' + keyPath)
         .then(keyPair => {
-          console.log('fetching', keyPath);
           $scope.keyPairs.set(keyPath.toString(), keyPair);
           $scope.$apply();
         });
@@ -297,22 +302,4 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
     // store key, 
     // load keys
   }
-
-  $scope.remoteStorage.on('connected', () => {
-    console.debug('connected RemoteStorage');
-
-    $scope.userAddress = $scope.remoteStorage.remote.userAddress;
-    $scope.$apply();
-
-    $scope.remoteStorage.access.claim('keypairs', 'rw');
-    $scope.remoteStorage.access.claim('keys', 'rw');
-    $scope.remoteStorage.access.claim('graphs', 'rw');
-    
-    $scope.remoteStorage.caching.enable('/keypairs/');
-    $scope.remoteStorage.caching.enable('/graphs/');
-    $scope.remoteStorage.caching.enable('/keys/');
-
-    $scope.loadKeyPairs();
-  });
 }]);
-
