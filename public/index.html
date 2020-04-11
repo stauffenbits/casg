@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="casgApp">
   <head>
+    <base href="/">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
@@ -57,9 +58,22 @@
           
           <ul>
             <label>Key Management</label>
-            <li><a href="#" ng-click="generateKeyPair()">Generate Key Pair</a></li>
-            <li><a href="#" ng-click="exportKeyPair()">Export Key Pair</a></li>
-            <li><a href="#" ng-click="importKeyPair()">Import Key Pair</a></li>
+
+            <a href="#" ng-click="generateKeyPair()">+</a>
+            <a href="/uploadKeyPair">↑</a>
+            <a href="#" ng-click="clearAllKeys()">✗</a>
+
+            <ul class="itemList">
+              <li ng-repeat="(title, privateKey) in privateKeys">
+                <a ng-if="!currentKeyPair || currentKeyPair.title != title" href="#" ng-click="activateKeyPair(title)">&#128275;</a>
+                <a ng-if="currentKeyPair.title == title" href="#" ng-click="deactivateKeyPair(title)">&#128274;</a>
+                <a href="#" ng-click="removeKeyPair(title)">✗</a>
+                <a href="#" ng-click="exportKeyPair(privateKey)">↓</a>
+                {{title}}
+              </li>
+            </ul>
+
+            <li></li>
             <li><a href="#" ng-click="sharePublicKey()">Share Public Key</a></li>
             <li><a href="#" ng-click="importPublicKey()">Import Public Key</a></li>
           </ul>
@@ -91,13 +105,7 @@
             <li>List of Vertices</li>
             <li>
               <label>Key Pairs</label>
-              <ul class="itemList">
-                <li ng-repeat="(title, privateKey) in privateKeys">
-                  <a href="#" ng-click="removeKeyPair(title)">✗</a>
-                  <a href="#" ng-click="exportKeyPair(privateKey)">⬇</a>
-                  {{title}}
-                </li>
-              </ul>
+              
             </li>
           </ul>
         </div>

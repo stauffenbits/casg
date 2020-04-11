@@ -1,3 +1,16 @@
+
+  $scope.remoteStorage.on('connected', () => {
+    console.debug('connected RemoteStorage');
+
+    $scope.userAddress = $scope.remoteStorage.remote.userAddress;
+    $scope.$apply();
+
+
+
+    $scope.loadKeyPairs();
+  });
+
+
 var casgApp = angular.module('casgApp', ['ngRoute', 'ngSanitize', 'ui.bootstrap']);
 
 var Graphs = {

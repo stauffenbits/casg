@@ -96,7 +96,7 @@ var KeyPairs = {
 
         store: function(key){
           return privateClient
-            .storeObject('keypair', `/keypairs/${key.title}.keypair`, key)
+            .storeObject('keypair', `/keypairs/${key.title}`, key)
             .then(() => {
               return key;
             })
@@ -116,12 +116,23 @@ var KeyPairs = {
             })
         },
 
-        get: function(title){
-          return privateClient.getObject(title);
+        clear(){
+          this.list().then(listing => {
+            if(listing){
+              Object.keys(listing).forEach(li => {
+                privateClient.remove('/keypairs/' + li);
+              })
+            }
+          })
         },
 
-        remove: function(path){
-          return privateClient.remove('/keypairs/' + path);
+        get: function(title){
+          return privateClient.getObject(`/keypairs/${title}`);
+        },
+
+        remove: function(title){
+          console.log('removing', title)
+          return privateClient.remove(`/keypairs/${title}`);
         },
 
         getFileURL(name){
@@ -138,6 +149,7 @@ var KeyPairs = {
               delete listing[key];
             }
           });
+
           return listing;
         }
       }
@@ -145,13 +157,100 @@ var KeyPairs = {
   }
 }
 
+class PGPLoader {
+  constructor(){
+    this.privateKey = null;
+  }
+
+  async setKey(privateKeyArmored, passphrase){
+    this.privateKeyArmored = privateKeyArmored;
+    this.passphrase = passphrase;
+
+    if(!privateKeyArmored === this.privateKeyArmored){
+      return;
+    }
+
+    this.privateKey = null;
+    const { keys: [privateKey] } = await openpgp.key.readArmored(this.privateKeyArmored);
+    if(privateKey){
+      this.privateKey = privateKey;
+    }
+
+    this.privateKey.decrypt(this.passphrase);
+  }
+
+  /*
+    Precondition:
+    - setKey(...) has been called
+
+    Postcondition: 
+    - None
+
+    Arguments: 
+    - text: string
+    - to: array of armored key strings, or single armored key
+
+    Return value:
+    - encrypted string
+  */
+  async encrypt(text, to){
+    if(!this.privateKey){
+      console.error("Please call setKey(...) first")
+      return;
+    }
+
+    if(to instanceof Array){
+      var publicKeys = await Promise.all(to.map(async key => {
+        return (await openpgp.key.readArmored(key)).keys[0];
+      }));
+    }else{
+      var publicKeys = (await openpgp.key.readArmored(to)).keys[0];
+    }
+
+    var { data: encrypted } = await openpgp.encrypt({
+      message: openpgp.message.fromText(text),
+      publicKeys,
+      privateKeys: [this.privateKey]
+    })
+
+    return encrypted;
+  }
+
+  /*
+    Precondition:
+    - setKey(...) has been called
+
+    Postcondition: 
+    - None
+
+    Arguments:
+    - encrypted: string of encrypted text
+    - senderPublicKey: the public key of the sender
+
+    Return value:
+    - decrypted text string
+  */
+  async decrypt(encrypted, senderPublicKey){
+    var {data: decrypted} = await openpgp.decrypt({
+      message: await openpgp.message.readArmored(encrypted),
+      publicKeys: (await openpgp.key.readArmored(senderPublicKey)).keys[0],
+      privateKeys: [this.privateKey]
+    })
+
+    return decrypted;
+  }
+}
+
 var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
   // RemoteStorage Variables and Functions
 
-  $scope.keyPaths = [];
-  $scope.keyPairs = new Map();
+  $scope.clearAllKeys = function(){
+    $scope.remoteStorage.keypairs.clear();    
+  }
 
+  $scope.pgp = new PGPLoader();
 
+  $scope.currentKeyPair = null;
   $scope.privateKeys = {};
   $scope.storeKeyPair = function(privateKey){
     $scope.remoteStorage.keypairs.store(privateKey);
@@ -160,7 +259,31 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
   }
 
   $scope.userAddress = null;
-  $scope.remoteStorage = new RemoteStorage({modules: [ Graphs, KeyPairs ] });
+  $scope.remoteStorage = new RemoteStorage({
+    modules: [ Graphs, KeyPairs ],
+    cache: true,
+    changeEvents: {
+      local:    true,
+      window:   true,
+      remote:   true,
+      conflict: true
+    }
+  });
+
+  $scope.remoteStorage.on('ready', function(){
+    $scope.userAddress = $scope.remoteStorage.remote.userAddress;
+    $scope.$apply();
+
+    $scope.remoteStorage.access.claim('keypairs', 'rw');
+    $scope.remoteStorage.access.claim('keys', 'rw');
+    $scope.remoteStorage.access.claim('graphs', 'rw');
+    
+    $scope.remoteStorage.caching.enable('/keypairs/');
+    $scope.remoteStorage.caching.enable('/graphs/');
+    $scope.remoteStorage.caching.enable('/keys/');
+
+    $scope.loadKeyPairs();
+  })
   
   $scope.remoteStorage.on('network-offline', () => {
     console.debug(`We're offline now.`);
@@ -176,41 +299,12 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
     $scope.remoteStorage.caching.enable('/sc-casg/')
   }
 
-  $scope.openGraph = function(){
-    if($scope.client !== null){
-      $scope.client.getListing('').then(listing => {
-        console.log('LISTING', listing);
-      })
-    }else{
-      alert('Please specify a storage account first.')
-    }
-  }
-
-  $scope.writeGraph = function(title, graph){
-    var title = prompt("Title:", 'Untitled');
-    
-    $scope.remoteStorage.graphs.store(
-      'text/casg', 
-      title, 
-      {
-        "title": title,
-        'time': [{tact: 'sequence'}, 
-          [{tact: 1000}, '+0![3](3.png)', '0![2](2.png)', '0![1](1.png)', '0![0](0.png)'],
-          [{tact: 'parallel'}, '-0', '+1![Joshua](Joshua.png)', '+2[37](black)', '+3![label](image)'], 
-          [{tact: 'parallel'}, '+1_2[label](color)', '+2_3', '+1_3'], 
-          [{tact: 500}, '-1_3', '-2_3', '-1_2', '-3', '-2', '-1'],
-          [{tact: 1000}, '+4![0](0.png)', '4![1](1.png)', '4![2](2.png)', '4![3](3.png)']
-        ]
-      }
-    )
-    .then(() => console.log("data has been saved"));
-  }
-
   // OpenPGP.js Variables and Functions
 
   $scope.generateKeyPair = async function(){
     var confirmation = confirm("Creating a new Key Pair means you will re-encrypt all files and shares. Would you like to continue?")
     if(!confirmation){
+      console.error('aborted');
       return;
     }
     
@@ -233,7 +327,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
     }
 
     // { privateKeyArmored, publicKeyArmored, revocationCertificate }
-    var keyTriple = await openpgp.generateKey({ 
+    var privateKey = await openpgp.generateKey({ 
       curve: 'curve25519',  
       userIds: [{ 
         name: name,
@@ -242,15 +336,35 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
       passphrase: pass
     });
 
-    keyTriple.title = `${name} <${email}>`;
+    privateKey.title = `${name} <${email}>`;
 
-    $scope.storeKeyPair(keyTriple);
+    $scope.storeKeyPair(privateKey);
+
+    if(!$scope.currentKeyPair){
+      $scope.currentKeyPair = privateKey;
+      $scope.pgp.setKey(privateKeyPair.privateKeyArmored, pass);
+    }
+  }
+
+  $scope.activateKeyPair = function(title){
+    var pass = prompt("Please enter the key pair's passpharse: ");
+    if(!pass){
+      console.error("aborted");
+      return;
+    }
+
+    $scope.currentKeyPair = $scope.privateKeys[title];
+    $scope.pgp.setKey($scope.currentKeyPair.privateKeyArmored, pass)
+  }
+
+  $scope.deactivateKeyPair = function(title){
+    $scope.currentKeyPair = null;
   }
 
   $scope.exportKeyPair = function(privateKey){
     var link = document.createElement('a');
     
-    link.download = `${privateKey.title}.keypair`;
+    link.download = `${privateKey.title}.privateKey`;
 
     var keyData = JSON.stringify(privateKey);
     var data = `data:text/json;charset=utf-8,${encodeURIComponent(keyData)}`;
@@ -261,58 +375,40 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
 
 
   $scope.loadKeyPairs = async function(){
-
-    $scope.keyPaths = [];
-    $scope.keyPairs = new Map();
-
     console.log("loading key pairs")
 
     var listing = await $scope.remoteStorage.keypairs.list();
     console.log('listing: ', listing);
     for(var keyPath in listing){
-      console.log('keypath', keyPath);
-      $scope.keyPaths.push(keyPath.toString());
-      
-      $scope.remoteStorage.keypairs.get('/keypairs/' + keyPath)
-        .then(keyPair => {
+      $scope.remoteStorage.keypairs.get(keyPath)
+        .then(privateKey => {
           console.log('fetching', keyPath);
-          $scope.keyPairs.set(keyPath.toString(), keyPair);
+          $scope.privateKeys[privateKey.title] = privateKey;
           $scope.$apply();
         });
     }
   }
 
-  $scope.removeKeyPair = function(path){
-    $scope.remoteStorage.keypairs.remove(path)
-    $scope.loadKeyPairs();
+  $scope.removeKeyPair = function(title){
+    $scope.remoteStorage.keypairs.remove(title)
+    delete $scope.privateKeys[title];
   }
 
-  $scope.importKeyPair = function(){
-    modalInstance.result
-    .then(keyPair => {
-      console.log(keyPair);
-    }, reason => {
-      console.error(reason);
-    })
-    // store key, 
-    // load keys
+  $scope.processKeyPairUpload = function(){
+    var f = document.querySelector('#key-pair-upload').files[0]
+    var r = new FileReader();
+
+    r.onload = function(e){
+      var data = e.target.result;
+      var privateKey = JSON.parse(data);
+
+      $scope.storeKeyPair(privateKey);
+
+      $scope.privateKeys[privateKey.title] = privateKey;
+      $scope.$apply();
+    }
+
+    r.readAsText(f);
   }
-
-  $scope.remoteStorage.on('connected', () => {
-    console.debug('connected RemoteStorage');
-
-    $scope.userAddress = $scope.remoteStorage.remote.userAddress;
-    $scope.$apply();
-
-    $scope.remoteStorage.access.claim('keypairs', 'rw');
-    $scope.remoteStorage.access.claim('keys', 'rw');
-    $scope.remoteStorage.access.claim('graphs', 'rw');
-    
-    $scope.remoteStorage.caching.enable('/keypairs/');
-    $scope.remoteStorage.caching.enable('/graphs/');
-    $scope.remoteStorage.caching.enable('/keys/');
-
-    $scope.loadKeyPairs();
-  });
 }]);
 
