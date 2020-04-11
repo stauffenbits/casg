@@ -6,7 +6,10 @@ casgApp.config(function($routeProvider, $locationProvider){
     templateUrl: 'casg/main.html'
   })
   .when('/uploadKeyPair', {
-    templateUrl: 'casg/uploadKeyPair.html'
+    templateUrl: 'casg/importKeyPair.html'
+  })
+  .when('/importPublicKey', {
+    templateUrl: 'casg/importPublicKey.html'
   })
   .otherwise({
     redirectTo: '/'

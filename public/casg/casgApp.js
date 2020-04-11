@@ -1,5 +1,12 @@
 var casgApp = angular.module('casgApp', ['ngRoute', 'ngSanitize', 'ui.bootstrap']);
 
+// https://stackoverflow.com/a/2117523/11169288
+function uuidv4() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
+
 var Graphs = {
   name: 'graphs',
   builder: function(privateClient, publicClient){
@@ -25,7 +32,7 @@ var Graphs = {
         }
       },
       'required': ['title']
-    })
+    });
 
     return {
       exports: {
@@ -95,18 +102,16 @@ var KeyPairs = {
       exports: {
 
         store: function(key){
-          return privateClient
-            .storeObject('keypair', `/keypairs/${key.title}`, key)
-            .then(() => {
-              return key;
-            })
+          console.log('storing ', key.title)
+          return privateClient.storeObject('keypair', `/casg/keypairs/${key.title}`, key);
         },
 
         list: function(){
           var self = this;
 
-          return privateClient.getListing('/keypairs/')
+          return privateClient.getListing('/casg/keypairs/')
             .then((listing) => {
+              console.log('keypair listing')
               if(listing){
                 self._removeDirectoryKeysFromListing(listing);
                 return listing;
@@ -120,28 +125,194 @@ var KeyPairs = {
           this.list().then(listing => {
             if(listing){
               Object.keys(listing).forEach(li => {
-                privateClient.remove('/keypairs/' + li);
+                privateClient.remove(li);
               })
             }
           })
         },
 
         get: function(title){
-          return privateClient.getObject(`/keypairs/${title}`);
+          return privateClient.getObject(`/casg/keypairs/${title}`);
         },
 
         remove: function(title){
-          console.log('removing', title)
-          return privateClient.remove(`/keypairs/${title}`);
+          return privateClient.remove(`/casg/keypairs/${title}`);
         },
 
-        getFileURL(name){
-          return privateClient.getItemURL(name);
+        _removeDirectoryKeysFromListing: function(listing) {
+          Object.keys(listing).forEach(function(key){
+            if (key.match(/\/$/)) {
+              delete listing[key];
+            }
+          });
+
+          return listing;
+        }
+      }
+    }
+  }
+}
+
+var OwnPublicKeys = {
+  name: 'ownpublickeys',
+  builder: function(privateClient, publicClient){
+    publicClient.declareType('ownpublickey', {
+      'type': 'object',
+      'properties': {
+        'title': {
+          'type': 'string'
+        },
+        'publicKeyArmored': {
+          'type': 'string'
+        }
+      }, 
+      'required': ['title', 'publicKeyArmored']
+    });
+
+    return {
+      exports: {
+        share: function(key){
+          return new Promise((resolve, reject) => {
+            publicClient
+            .storeObject('ownpublickey', `/casg/ownpublickeys/${uuidv4()}`, {
+              title: key.title,
+              publicKeyArmored: key.publicKeyArmored
+            })
+            .then(() => {
+              resolve(publicClient.getItemURL(`${key.title}`));
+            }, reject)
+          })
         },
 
-        getFile(path){
-          return privateClient.getFile(path);
+        list: function(){
+          var self = this;
+
+          return publicClient.getListing('/casg/ownpublickeys/')
+            .then(async (listing) => {
+              if(listing){
+                self._removeDirectoryKeysFromListing(listing);
+
+                var titleUrls = {};
+                await Promise.all(
+                  Object.keys(listing).map(li => new Promise((resolve, reject) => {
+                    publicClient.getFileURL(li).then(url => {
+                      titleUrls[li] = url;
+                      resolve(url);
+                    }, reject);
+                  }))
+                );
+
+                return titleUrls;
+              }else{
+                return {};
+              }
+            })
         },
+
+
+        _removeDirectoryKeysFromListing: function(listing) {
+          Object.keys(listing).forEach(function(key){
+            if (key.match(/\/$/)) {
+              delete listing[key];
+            }
+          });
+
+          return listing;
+        }
+      }
+    }
+  }
+}
+
+var OthersPublicKeys = {
+  name: 'otherspublickeys',
+  builder: function(privateClient, publicClient){
+    privateClient.declareType('otherspublickey', {
+      'type': 'object',
+      'properties': {
+        'title': {
+          'type': 'string'
+        },
+        'publicKeyArmored': {
+          'type': 'string'
+        }
+      }, 
+      'required': ['title', 'publicKeyArmored']
+    });
+
+    return {
+      exports: {
+        store: function(key, $scope){
+          return new Promise(async (resolve, reject) => {
+            var encryptedTitle = await $scope.pgp.encrypt(key.title, [$scope.currentKeyPair.publicKeyArmored]);
+            var encryptedKey = await $scope.pgp.encrypt(JSON.stringify(key.publicKeyArmored), [$scope.currentKeyPair.publicKeyArmored]);
+
+            privateClient
+            .storeObject('otherspublickey', `/casg/otherspublickeys/${key.title}`, {
+              title: encryptedTitle,
+              publicKeyArmored: encryptedKey
+            })
+            .then(resolve, reject)
+          })
+        },
+
+        getAll: function($scope){
+          var self = this;
+
+          return privateClient.getListing('/casg/otherspublickeys/')
+            .then(async (listing) => {
+              if(listing){
+                self._removeDirectoryKeysFromListing(listing);
+
+                var publicKeys = {};
+                await Promise.all(
+                  Object.keys(listing).map(li => new Promise((resolve, reject) => {
+                    privateClient.getObject(li).then(publicKey => {
+                      publicKeys[li] = publicKey;
+
+                      var decryptedTitle = $scope.pgp.decrypt(publicKey.title, $scope.currentKeyPair.publicKeyArmored);
+                      var decryptedKey = $scope.pgp.decrypt(publicKey.publicKeyArmored, $scope.currentKeyPair.publicKeyArmored);
+
+                      resolve({
+                        title: decryptedTitle,
+                        publicKeyArmored: decryptedKey                        
+                      });
+                    }, reject);
+                  }))
+                );
+
+                return publicKeys;
+              }else{
+                return {};
+              }
+            });
+        },
+
+        list: function(){
+          var self = this;
+
+          return privateClient.getListing('/casg/otherspublickeys/')
+            .then(async (listing) => {
+              if(listing){
+                self._removeDirectoryKeysFromListing(listing);
+
+                var titleUrls = {};
+                await Promise.all(
+                  Object.keys(listing).map(li => new Promise((resolve, reject) => {
+                    privateClient.getObject(li).then(publicKey => {
+                      titleUrls[li] = publicKey;
+                      resolve(url);
+                    }, reject);
+                  }))
+                );
+
+                return titleUrls;
+              }else{
+                return {};
+              }
+            })
+        },
+
 
         _removeDirectoryKeysFromListing: function(listing) {
           Object.keys(listing).forEach(function(key){
@@ -243,6 +414,7 @@ class PGPLoader {
 
 var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
   // RemoteStorage Variables and Functions
+  $('[data-toggle="tooltip"]').tooltip();
 
   $scope.clearAllKeys = function(){
     $scope.remoteStorage.keypairs.clear();    
@@ -252,6 +424,8 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
 
   $scope.currentKeyPair = null;
   $scope.privateKeys = {};
+  $scope.publicKeys = {};
+
   $scope.storeKeyPair = function(privateKey){
     $scope.remoteStorage.keypairs.store(privateKey);
     $scope.privateKeys[privateKey.title] = privateKey;
@@ -260,7 +434,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
 
   $scope.userAddress = null;
   $scope.remoteStorage = new RemoteStorage({
-    modules: [ Graphs, KeyPairs ],
+    modules: [ Graphs, KeyPairs, OwnPublicKeys, OthersPublicKeys ],
     cache: true,
     changeEvents: {
       local:    true,
@@ -274,15 +448,20 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
     $scope.userAddress = $scope.remoteStorage.remote.userAddress;
     $scope.$apply();
 
-    $scope.remoteStorage.access.claim('keypairs', 'rw');
-    $scope.remoteStorage.access.claim('keys', 'rw');
-    $scope.remoteStorage.access.claim('graphs', 'rw');
-    
-    $scope.remoteStorage.caching.enable('/keypairs/');
-    $scope.remoteStorage.caching.enable('/graphs/');
-    $scope.remoteStorage.caching.enable('/keys/');
+    $scope.remoteStorage.access.claim('casg', 'rw');
+
+    $scope.remoteStorage.caching.enable('/casg/');
+    $scope.remoteStorage.caching.enable('/casg/ownpublickeys/');
+    $scope.remoteStorage.caching.enable('/casg/otherspublickeys/');
+    $scope.remoteStorage.caching.enable('/public/casg/');
 
     $scope.loadKeyPairs();
+
+    $scope.remoteStorage.otherspublickeys.getAll($scope)
+    .then(keys => {
+      $scope.publicKeys = keys;
+      $scope.$apply();
+    })
   })
   
   $scope.remoteStorage.on('network-offline', () => {
@@ -296,7 +475,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
   $scope.storageWidget = new Widget($scope.remoteStorage);
   $scope.configureStorage = function(){
     $scope.storageWidget.attach('remote-storage-configuration');
-    $scope.remoteStorage.caching.enable('/sc-casg/')
   }
 
   // OpenPGP.js Variables and Functions
@@ -342,7 +520,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
 
     if(!$scope.currentKeyPair){
       $scope.currentKeyPair = privateKey;
-      $scope.pgp.setKey(privateKeyPair.privateKeyArmored, pass);
+      $scope.pgp.setKey($scope.currentKeyPair.privateKeyArmored, pass);
     }
   }
 
@@ -364,7 +542,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
   $scope.exportKeyPair = function(privateKey){
     var link = document.createElement('a');
     
-    link.download = `${privateKey.title}.privateKey`;
+    link.download = `${privateKey.title}.keypair.json`;
 
     var keyData = JSON.stringify(privateKey);
     var data = `data:text/json;charset=utf-8,${encodeURIComponent(keyData)}`;
@@ -381,11 +559,14 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
     console.log('listing: ', listing);
     for(var keyPath in listing){
       $scope.remoteStorage.keypairs.get(keyPath)
-        .then(privateKey => {
-          console.log('fetching', keyPath);
-          $scope.privateKeys[privateKey.title] = privateKey;
-          $scope.$apply();
-        });
+      .then(privateKey => {
+        console.log('fetching', keyPath);
+        
+        $scope.privateKeys[privateKey.title] = privateKey;
+        $scope.$apply();
+      });
+
+      // i still can't get over the fact that 
     }
   }
 
@@ -394,7 +575,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
     delete $scope.privateKeys[title];
   }
 
-  $scope.processKeyPairUpload = function(){
+  $scope.importKeyPair = function(){
     var f = document.querySelector('#key-pair-upload').files[0]
     var r = new FileReader();
 
@@ -409,6 +590,25 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
     }
 
     r.readAsText(f);
+  }
+
+  $scope.sharePublicKey = function(key){
+    var confirmation = confirm("Sharing your public key will share your name and email address, making it discoverable on the web. Please confirm you want to do that...");
+    if(!confirmation){
+      console.error('aborted');
+      return;
+    }
+    
+    $scope.remoteStorage.ownpublickeys.share(key).then(url => {
+      key.url = url;
+      $scope.$apply();
+    })
+  };
+
+  $scope.importPublicKey = function(url){
+    $http.get(url).then((response) => {
+      $scope.remoteStorage.otherspublickeys.store(response.data, $scope);
+    })
   }
 }]);
 

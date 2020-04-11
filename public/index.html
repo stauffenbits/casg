@@ -11,8 +11,11 @@
     <script type="text/javascript" src="angular.min.js"></script>
     <script type="text/javascript" src="angular-route.min.js"></script>
     <script type="text/javascript" src="angular-sanitize.min.js"></script>
+
+    <script type="text/javascript" src="popper.min.js"></script>
     <script type="text/javascript" src="bootstrap.min.js"></script>
     <script type="text/javascript" src="ui-bootstrap-tpls.js"></script>
+
 
     <!-- fourd dependencies -->
     <script type="text/javascript" src="fourd/r90.three.min.js"></script>
@@ -41,46 +44,40 @@
       <div class="row">
         <div class="col-sm-4">
           <h5><a href="/">create, aggregate & share graphs</a></h5>
-          <i>built for Mozilla Firefox</i>
+          <i>a Social Cartography undertaking</i>
 
           <hr>
           <ul>
-            <label>Me</label>
-            <li>{{userAddress || "Not Logged In"}}</li>
-            <li><a href="#" ng-click="configureStorage()">Configure RemoteStorage</a></li>
+            <label>Storage</label>
+            <li><a ng-if="userAddress" ng-href="#" ng-click="configureStorage()">{{userAddress}}</a></li>
+            <li><a ng-if="!userAddress" href="#" ng-click="configureStorage()">Configure RemoteStorage</a></li>
             <li id="remote-storage-configuration"></li>
           </ul>
           
           <ul>
-            <label>File</label>
-            <li><a href="#" ng-click="openGraph()">Open Graph</a></li>
-          </ul>
-          
-          <ul>
+            <a href="#" ng-click="generateKeyPair()" data-toggle="tooltip" data-placement="top" title="Generate Key Pair">+</a>
+            <a href="/uploadKeyPair" data-toggle="tooltip" data-placement="top" title="Import Key Pair">↑</a>
+            <a href="#" ng-click="clearAllKeys()" data-toggle="tooltip" data-placement="top" title="Delete all Key Pairs">✗</a>
+            <a href="/importPublicKey" ng-click="importPublicKey()" data-toggle="tooltop" data-placement="top" title="Import Public Key">←</a>
             <label>Key Management</label>
-
-            <a href="#" ng-click="generateKeyPair()">+</a>
-            <a href="/uploadKeyPair">↑</a>
-            <a href="#" ng-click="clearAllKeys()">✗</a>
 
             <ul class="itemList">
               <li ng-repeat="(title, privateKey) in privateKeys">
                 <a ng-if="!currentKeyPair || currentKeyPair.title != title" href="#" ng-click="activateKeyPair(title)">&#128275;</a>
                 <a ng-if="currentKeyPair.title == title" href="#" ng-click="deactivateKeyPair(title)">&#128274;</a>
-                <a href="#" ng-click="removeKeyPair(title)">✗</a>
+                <a ng-if="privateKey.url !== undefined" target="_blank" ng-href="{{privateKey.url}}">&#128279;</a>
                 <a href="#" ng-click="exportKeyPair(privateKey)">↓</a>
+                <a href="#" ng-click="sharePublicKey(privateKey)">→</a>
+                <a href="#" ng-click="removeKeyPair(title)">✗</a>
                 {{title}}
               </li>
             </ul>
-
-            <li></li>
-            <li><a href="#" ng-click="sharePublicKey()">Share Public Key</a></li>
-            <li><a href="#" ng-click="importPublicKey()">Import Public Key</a></li>
           </ul>
           
           <ul>
-            <label>File (cont'd.)</label>
+            <label>File</label>
             <li><a href="#" ng-click="writeGraph()">Save Graph</a></li>
+            <li><a href="#" ng-click="openGraph()">Open Graph</a></li>
           </ul>
           
           <ul>

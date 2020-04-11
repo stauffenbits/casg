@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/stauffenbits/casg#readme",
   "dependencies": {
+    "@popperjs/core": "^2.2.2",
     "angular": "^1.7.9",
     "angular-animate": "^1.7.9",
     "angular-route": "^1.7.9",
@@ -34,6 +35,7 @@
     "localforage": "^1.7.3",
     "openpgp": "^4.10.1",
     "pegjs": "^0.10.0",
+    "popper.js": "^1.16.1",
     "remotestorage-module-documents": "^0.2.1",
     "remotestorage-widget": "^1.5.1",
     "remotestoragejs": "^1.2.3"
