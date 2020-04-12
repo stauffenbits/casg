@@ -49,6 +49,7 @@
           <hr>
           <ul>
             <label>Storage</label>
+            <!-- <li><a href="#" ng-click="clearAll()">Clear All Storage</a></li> -->
             <li><a ng-if="userAddress" ng-href="#" ng-click="configureStorage()">{{userAddress}}</a></li>
             <li><a ng-if="!userAddress" href="#" ng-click="configureStorage()">Configure RemoteStorage</a></li>
             <li id="remote-storage-configuration"></li>
@@ -57,11 +58,12 @@
           <ul>
             <a href="#" ng-click="generateKeyPair()" data-toggle="tooltip" title="Generate Key Pair">+</a>
             <a href="/uploadKeyPair" data-toggle="tooltip" title="Import Key Pair">↑</a>
-            <a href="#" ng-click="clearAllKeys()" data-toggle="tooltip" title="Delete all Key Pairs">✗</a>
+            <a href="#" ng-click="clearKeyPairs()" data-toggle="tooltip" title="Delete all Key Pairs">✗</a>
             <a href="/importPublicKey" ng-click="importPublicKey()" data-toggle="tooltop" title="Import Public Key">←</a>
             <label>Key Management</label>
 
             <ul class="itemList">
+              <label>Private Keys</label>
               <li ng-repeat="(title, privateKey) in privateKeys">
                 <a href="#" data-toggle="tooltip" title="Activate Key Pair" ng-if="!currentKeyPair || currentKeyPair.title != title" ng-click="activateKeyPair(title)">&#128275;</a>
                 <a href="#" data-toggle="tooltip" title="Deactivate Key Pair" ng-if="currentKeyPair.title == title" href="#" ng-click="deactivateKeyPair(title)">&#128274;</a>
@@ -69,6 +71,13 @@
                 <a href="#" data-toggle="tooltip" title="Export Public Key to Device" ng-click="exportKeyPair(privateKey)">↓</a>
                 <a href="#" data-toggle="tooltip" title="Share Public Key to Cloud" ng-click="sharePublicKey(privateKey)">→</a>
                 <a href="#" data-toggle="tooltip" title="Remove Key Pair" ng-click="removeKeyPair(title)">✗</a>
+                {{title}}
+              </li>
+            </ul>
+
+            <ul>
+              <label>Public Keys</label>
+              <li ng-repeat="(title, publicKey) in publicKeys">
                 {{title}}
               </li>
             </ul>

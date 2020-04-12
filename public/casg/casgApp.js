@@ -102,8 +102,8 @@ var KeyPairs = {
       exports: {
 
         store: function(key){
-          console.log('storing ', key.title)
-          return privateClient.storeObject('keypair', key.title, key);
+          var path = `/casg/keypairs/${key.title}`;
+          return privateClient.storeObject('keypair', path, key);
         },
 
         list: function(){
@@ -132,11 +132,13 @@ var KeyPairs = {
         },
 
         get: function(title){
-          return privateClient.getObject(title);
+          var path = `/casg/keypairs/${title}`;
+          return privateClient.getObject(path);
         },
 
         remove: function(title){
-          return privateClient.remove(title);
+          var path = `/casg/keypairs/${title}`;
+          return privateClient.remove(path);
         },
 
         _removeDirectoryKeysFromListing: function(listing) {
@@ -151,7 +153,7 @@ var KeyPairs = {
       }
     }
   }
-}
+};
 
 var OwnPublicKeys = {
   name: 'ownpublickeys',
@@ -318,7 +320,6 @@ var OthersPublicKeys = {
             })
         },
 
-
         _removeDirectoryKeysFromListing: function(listing) {
           Object.keys(listing).forEach(function(key){
             if (key.match(/\/$/)) {
@@ -421,8 +422,10 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   // RemoteStorage Variables and Functions
   $('[data-toggle="tooltip"]').tooltip();
 
-  $scope.clearAllKeys = function(){
+  $scope.clearKeyPairs = function(){
     $scope.remoteStorage.keypairs.clear();    
+    $scope.privateKeys = {};
+    $scope.$apply();
   }
 
   $scope.pgp = new PGPLoader();
@@ -462,9 +465,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.remoteStorage.access.claim('public', 'rw');
 
     $scope.remoteStorage.caching.enable('/casg/');
-    $scope.remoteStorage.caching.enable('/casg/ownpublickeys/');
-    $scope.remoteStorage.caching.enable('/casg/otherspublickeys/');
-    $scope.remoteStorage.caching.enable('/public/casg/publickeys/');
+    $scope.remoteStorage.caching.enable('/public/')
 
     $scope.loadKeyPairs();
 
@@ -634,6 +635,10 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       console.log(response.data);
       $scope.remoteStorage.otherspublickeys.store(response.data, $scope);
     })
+  }
+
+  $scope.clearAll = function(){
+    $scope.remoteStorage.disconnect();
   }
 }]);
 
