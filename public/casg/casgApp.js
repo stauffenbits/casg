@@ -578,7 +578,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.$apply();
   }
 
-  $scope.exportKeyPair = function(privateKey){
+  $scope.exportToDevice = function(privateKey){
     var link = document.createElement('a');
     
     link.download = `${privateKey.title}.keypair.json`;
@@ -588,6 +588,11 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     link.href = data;
 
     link.click();
+  }
+
+  $scope.exportToDevice = function(keyPair){
+    $scope.RS.ownPublicKeys.share(keyPair);
+    $scope.$apply();
   }
 
   $scope.importKeyPair = function(){
