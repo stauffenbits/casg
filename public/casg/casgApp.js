@@ -124,7 +124,7 @@ var KeyPairs = {
         },
 
         _generator: async function*(){
-          var listing = await client.getListing(`${client.base}${folder}`, false);
+          var listing = await client.getListing(`${folder}`, false);
 
           for(var li of Object.keys(listing)){
             var lio = await client.getObject(li.toString());
@@ -135,7 +135,7 @@ var KeyPairs = {
         },
 
         list: async function(){
-          var listing = await client.getListing(`${client.base}`, false);
+          var listing = await client.getListing(``, false);
           
           if(!listing){
             return [];
@@ -162,7 +162,7 @@ var KeyPairs = {
 
         store: function(keyPair){
           var file = uuidv4();
-          var path = `${client.base}${file}`;
+          var path = `${file}`;
           client.storeObject('casg-keypair', path, keyPair);
           this._augment(keyPair, path);
 
@@ -243,7 +243,7 @@ var OwnPublicKeys = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing(client.base, false);
+          var listing = await client.getListing('', false);
           
           if(!listing){
             return [];
@@ -269,7 +269,7 @@ var OwnPublicKeys = {
         },
 
         share: function(keyPair){
-          var path = `${client.base}${keyPair.name}`;
+          var path = `${keyPair.name}`;
 
           return new Promise((resolve, reject) => {
             client.storeObject('casg-ownpublickey', path, {
@@ -316,7 +316,7 @@ var OthersPublicKeys = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing(client.base, false);
+          var listing = await client.getListing('', false);
           
           if(!listing){
             return [];
@@ -342,7 +342,7 @@ var OthersPublicKeys = {
         },
 
         import: async function(url){
-          var path = `${client.base}${uuidv4()}`;
+          var path = `${uuidv4()}`;
           
           return new Promise((resolve, reject) => {
             $.get(url, {}, (data, status) => {
@@ -533,6 +533,8 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.access.claim('public', 'rw');
 
     $scope.RS.caching.enable('/keyPairs/');
+    $scope.RS.caching.enable('/ownPublicKeys/');
+    $scope.RS.caching.enable('/othersPublicKeyss', 'rw');
     $scope.RS.caching.enable('/public/');
     
     $scope.keyPairs = await $scope.RS.keyPairs.list();
@@ -548,7 +550,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     }
 
     var c = $scope.RS.scope('/');
-    ['/casg/', '/public/'].forEach(path => {
+    ['/key/', '/public/'].forEach(path => {
       c.getListing(path, false).then(listing => {
         if(!listing){
           return;
