@@ -262,11 +262,6 @@ var OwnPublicKeys = {
           });
 
           return lio;
-        },
-
-        remove: function(keyPair){
-          var path = `${keyPair.name}`;
-          client.remove(path);
         }
       }
     }
