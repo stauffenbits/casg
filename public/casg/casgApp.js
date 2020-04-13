@@ -95,7 +95,6 @@ var KeyPairs = {
   name: 'keyPairs',
   builder: function(privateClient, publicClient){    
     var client = privateClient;
-    var folder = '/casg/KeyPairs/';
     var pgp = new PGPLoader();
 
     client.declareType('casg-keypair', {
@@ -136,7 +135,7 @@ var KeyPairs = {
         },
 
         list: async function(){
-          var listing = await client.getListing(`${client.base}${folder}`, false);
+          var listing = await client.getListing(`${client.base}`, false);
           
           if(!listing){
             return [];
@@ -163,7 +162,7 @@ var KeyPairs = {
 
         store: function(keyPair){
           var file = uuidv4();
-          var path = `${folder}${file}`;
+          var path = `${client.base}${file}`;
           client.storeObject('casg-keypair', path, keyPair);
           this._augment(keyPair, path);
 
@@ -226,7 +225,6 @@ var OwnPublicKeys = {
   name: 'ownPublicKeys',
   builder: function(privateClient, publicClient){
     var client = publicClient;
-    var folder = '/public/OwnPublicKeys/';
 
     client.declareType('casg-ownpublickey', {
       'type': 'object',
@@ -244,23 +242,8 @@ var OwnPublicKeys = {
 
     return {
       exports: {
-        [Symbol.iterator]: function(){
-          return this._generator();
-        },
-
-        _generator: async function*(){
-          var listing = await client.getListing(folder, false);
-
-          for(var li of Object.keys(listing)){
-            var lio = await client.getObject(li);
-            this._augment(lio, li);
-
-            yield lio;
-          }
-        },
-
         list: async function(){
-          var listing = await client.getListing(folder, false);
+          var listing = await client.getListing(client.base, false);
           
           if(!listing){
             return [];
@@ -286,7 +269,7 @@ var OwnPublicKeys = {
         },
 
         share: function(keyPair){
-          var path = `${keyPair.name}`;
+          var path = `${client.base}${keyPair.name}`;
 
           return new Promise((resolve, reject) => {
             client.storeObject('casg-ownpublickey', path, {
@@ -314,7 +297,6 @@ var OthersPublicKeys = {
   name: 'othersPublicKeys',
   builder: function(privateClient, publicClient){
     var client = privateClient;
-    var folder = '/casg/OthersPublicKeys/';
 
     client.declareType('casg-otherspublickey', {
       'type': 'object',
@@ -333,23 +315,8 @@ var OthersPublicKeys = {
 
     return {
       exports: {
-        [Symbol.iterator]: function(){
-          return this._generator();
-        },
-
-        _generator: async function*(){
-          var listing = await client.getListing(folder, false);
-
-          for(var li of Object.keys(listing)){
-            var lio = await client.getObject(li);
-            this._augment(lio, li);
-
-            yield lio;
-          }
-        },
-
         list: async function(){
-          var listing = await client.getListing(folder, false);
+          var listing = await client.getListing(client.base, false);
           
           if(!listing){
             return [];
@@ -375,7 +342,7 @@ var OthersPublicKeys = {
         },
 
         import: async function(url){
-          var path = `${folder}${uuidv4()}`;
+          var path = `${client.base}${uuidv4()}`;
           
           return new Promise((resolve, reject) => {
             $.get(url, {}, (data, status) => {
@@ -415,7 +382,6 @@ var Graphs = {
   name: 'graphs',
   builder: function(privateClient, publicClient){
     var client = privateClient;
-    var folder = '/casg/graphs/';
     var pgp = new PGPLoader();
     
     privateClient.declareType('casg-graph', {
@@ -561,10 +527,10 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
 
   $scope.RS.on('ready', async function(){
     $scope.RS.access.claim('*', 'rw');
-    $scope.RS.access.claim('casg', 'rw');
+    $scope.RS.access.claim('keyPairs', 'rw');
     $scope.RS.access.claim('public', 'rw');
 
-    $scope.RS.caching.enable('/casg/');
+    $scope.RS.caching.enable('/keyPairs/');
     $scope.RS.caching.enable('/public/');
     
     $scope.keyPairs = await $scope.RS.keyPairs.list();
