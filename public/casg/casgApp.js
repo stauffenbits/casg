@@ -604,6 +604,12 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.$apply();
   }
 
+  $scope.removePublicKeyListing = function(key){
+    $scope.ownPublicKeys = $scope.ownPublicKeys.slice($scope.ownPublicKeys.indexOf(key));
+    key.remove();
+    $scope.$apply();
+  }
+
   $scope.sharePublicKey = async function(key){
     var confirmation = confirm("Sharing your public key will share your name and email address, making it discoverable on the web. Please confirm you want to do that...");
     if(!confirmation){
