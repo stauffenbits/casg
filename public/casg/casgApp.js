@@ -121,29 +121,19 @@ var KeyPairs = {
       exports: {
 
         list: async function(){
-          var listing = await client.getListing(`/keyPairs/`, false);
-          
-          if(!listing){
-            return [];
-          }
-          
-          return (await Promise.all(
-            Object.keys(listing).map(li => {
-              if(li){
-                return new Promise((resolve, reject) =>
-                  client.getObject(li, false).then(lio => {
-                    if(lio){
-                      this._augment(lio, li);
-                      resolve(lio);
-                    }else{
-                      resolve(null)
-                    }
-                  }, reject))
-              }else{
-                return null;
+          return await new Promise((resolve, reject) => {  
+            client.getAll('/othersPublicKeys/', false).then(objects => {
+              var arr = [];
+
+              for(var key in objects){
+                objects[key].name = key;
+                this._augment(objects[key], key.toString());
+                arr.push(objects[key]);
               }
+
+              resolve(arr);
             })
-          )).filter((lio) => lio);
+          });
         },
 
         store: function(keyPair){
@@ -229,29 +219,19 @@ var OwnPublicKeys = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing('/ownPublicKeys/', false);
-          
-          if(!listing){
-            return [];
-          }
-          
-          return (await Promise.all(
-            Object.keys(listing).map(li => {
-              if(li){
-                return new Promise((resolve, reject) =>
-                  client.getObject(li, false).then(lio => {
-                    if(lio){
-                      this._augment(lio, li);
-                      resolve(lio);
-                    }else{
-                      resolve(null)
-                    }
-                  }, reject))
-              }else{
-                return null;
+          return await new Promise((resolve, reject) => {  
+            client.getAll('/othersPublicKeys/', false).then(objects => {
+              var arr = [];
+
+              for(var key in objects){
+                objects[key].name = key;
+                this._augment(objects[key], key.toString());
+                arr.push(objects[key]);
               }
+
+              resolve(arr);
             })
-          )).filter((lio) => lio);
+          });
         },
 
         share: function(keyPair){
@@ -302,29 +282,19 @@ var OthersPublicKeys = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing('/othersPublicKeys/', false);
-          
-          if(!listing){
-            return [];
-          }
-          
-          return (await Promise.all(
-            Object.keys(listing).map(li => {
-              if(li){
-                return new Promise((resolve, reject) =>
-                  client.getObject(li, false).then(lio => {
-                    if(lio){
-                      this._augment(lio, li);
-                      resolve(lio);
-                    }else{
-                      resolve(null)
-                    }
-                  }, reject))
-              }else{
-                return null;
+          return await new Promise((resolve, reject) => {  
+            client.getAll('/othersPublicKeys/', false).then(objects => {
+              var arr = [];
+
+              for(var key in objects){
+                objects[key].name = key;
+                this._augment(objects[key], key.toString());
+                arr.push(objects[key]);
               }
+
+              resolve(arr);
             })
-          )).filter((lio) => lio);
+          });
         },
 
         import: async function(url){
@@ -395,29 +365,19 @@ var Graphs = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing('/graphs/', false);
-          
-          if(!listing){
-            return [];
-          }
-          
-          return (await Promise.all(
-            Object.keys(listing).map(li => {
-              if(li){
-                return new Promise((resolve, reject) =>
-                  client.getObject(li, false).then(lio => {
-                    if(lio){
-                      this._augment(lio, li);
-                      resolve(lio);
-                    }else{
-                      resolve(null)
-                    }
-                  }, reject))
-              }else{
-                return null;
+          return await new Promise((resolve, reject) => {  
+            client.getAll('/othersPublicKeys/', false).then(objects => {
+              var arr = [];
+
+              for(var key in objects){
+                objects[key].name = key;
+                this._augment(objects[key], key.toString());
+                arr.push(objects[key]);
               }
+
+              resolve(arr);
             })
-          )).filter((lio) => lio);
+          });
         },
 
         store: function(graph){
