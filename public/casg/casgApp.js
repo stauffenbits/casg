@@ -631,10 +631,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     }
 
     var url = await $scope.RS.ownpublickeys.share(key);
-    
-    $scope.publicKeyUrls[key.title] = url;
-
-    console.log(key.title, 'shared at', url)
+    $scope.$apply();
     return url;
   };
 
