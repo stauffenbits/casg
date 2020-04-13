@@ -606,6 +606,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       var privateKey = JSON.parse(data);
 
       $scope.RS.keyPairs.store(privateKey);
+      $scope.keyPairs.push(privateKey);
       $scope.$apply();
     }
 
