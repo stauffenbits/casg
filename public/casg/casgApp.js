@@ -150,7 +150,7 @@ var KeyPairs = {
                     this._augment(lio, li);
                     resolve(lio);
                   }else{
-                    reject('not found')
+                    resolve(null)
                   }
                 }, reject))
             )
@@ -270,7 +270,7 @@ var OwnPublicKeys = {
                     this._augment(lio, li);
                     resolve(lio);
                   }else{
-                    reject('not found')
+                    resolve(null);
                   }
                 }, reject))
             )
@@ -355,7 +355,7 @@ var OthersPublicKeys = {
                     this._augment(lio, li);
                     resolve(lio);
                   }else{
-                    reject('not found')
+                    resolve(null);
                   }
                 }, reject))
             )
@@ -460,7 +460,7 @@ var Graphs = {
                     this._augment(lio, li);
                     resolve(lio);
                   }else{
-                    reject('not found')
+                    resolve(null)
                   }
                 }, reject))
             )
