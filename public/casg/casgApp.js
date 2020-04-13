@@ -231,22 +231,19 @@ var OwnPublicKeys = {
 
         share: function(keyPair){
           var path = `${keyPair.name}`;
+          var publicKey = {
+            title: keyPair.title,
+            publicKeyArmored: keyPair.publicKeyArmored
+          };
 
-          return new Promise((resolve, reject) => {
-            var publicKey = {
-              title: keyPair.title,
-              publicKeyArmored: keyPair.publicKeyArmored
-            };
+          client.storeObject('casg-ownpublickey', path, publicKey)
+        
+          var url = client.getItemURL(path);
+          keyPair.publicUrl = url;
 
-            client.storeObject('casg-ownpublickey', path, publicKey)
-          
-            var url = client.getItemURL(path);
-            keyPair.publicUrl = url;
+          this._augment(publicKey, path);
 
-            this._augment(publicKey, path);
-
-            resolve(publicKey);
-          });
+          return publicKey;
         },
 
         _augmentIO: function(lio, li){
@@ -596,7 +593,8 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   }
 
   $scope.exportToWeb = async function(keyPair){
-    $scope.ownPublicKeys.push(await $scope.RS.ownPublicKeys.share(keyPair));
+    await $scope.RS.ownPublicKeys.share(keyPair)
+    $scope.ownPublicKeys.push();
     $scope.$apply();
   }
 
