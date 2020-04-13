@@ -125,7 +125,7 @@ var KeyPairs = {
         },
 
         _generator: async function*(){
-          var listing = await client.getListing(folder);
+          var listing = await client.getListing(folder, false);
 
           for(var li of Object.keys(listing)){
             var lio = await client.getObject(li.toString());
@@ -136,7 +136,7 @@ var KeyPairs = {
         },
 
         list: async function(){
-          var listing = await client.getListing(folder);
+          var listing = await client.getListing(folder, false);
           
           if(!listing){
             return [];
@@ -245,7 +245,7 @@ var OwnPublicKeys = {
         },
 
         _generator: async function*(){
-          var listing = await client.getListing(folder);
+          var listing = await client.getListing(folder, false);
 
           for(var li of Object.keys(listing)){
             var lio = await client.getObject(li);
@@ -256,7 +256,7 @@ var OwnPublicKeys = {
         },
 
         list: async function(){
-          var listing = await client.getListing(folder);
+          var listing = await client.getListing(folder, false);
           
           if(!listing){
             return [];
@@ -330,7 +330,7 @@ var OthersPublicKeys = {
         },
 
         _generator: async function*(){
-          var listing = await client.getListing(folder);
+          var listing = await client.getListing(folder, false);
 
           for(var li of Object.keys(listing)){
             var lio = await client.getObject(li);
@@ -341,7 +341,7 @@ var OthersPublicKeys = {
         },
 
         list: async function(){
-          var listing = await client.getListing(folder);
+          var listing = await client.getListing(folder, false);
           
           if(!listing){
             return [];
@@ -435,7 +435,7 @@ var Graphs = {
         },
 
         _generator: async function*(){
-          var listing = await client.getListing(folder);
+          var listing = await client.getListing(folder, false);
 
           for(var li of Object.keys(listing)){
             var lio = await client.getObject(li);
@@ -446,7 +446,7 @@ var Graphs = {
         },
 
         list: async function(){
-          var listing = await client.getListing(folder);
+          var listing = await client.getListing(folder, false);
           
           if(!listing){
             return [];
@@ -560,7 +560,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
 
     var c = $scope.RS.scope('/');
     ['/casg/', '/public/'].forEach(path => {
-      c.getListing(path).then(listing => {
+      c.getListing(path, false).then(listing => {
         if(!listing){
           return;
         }
