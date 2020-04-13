@@ -247,8 +247,18 @@ var OwnPublicKeys = {
           }
         },
 
-        list: function(){
-          return [...this];
+        list: async function(){
+          var listing = await client.getListing(folder);
+          
+          return Promise.all(
+            Object.keys(listing).map(li =>
+              new Promise((resolve, reject) => 
+                client.getObject(li).then(lio => {
+                  this._augment(lio, li);
+                  resolve(lio);
+                }, reject))
+            )
+          );
         },
 
         share: function(keyPair){
@@ -314,10 +324,19 @@ var OthersPublicKeys = {
           }
         },
 
-        list: function(){
-          return [...this];
+        list: async function(){
+          var listing = await client.getListing(folder);
+          
+          return Promise.all(
+            Object.keys(listing).map(li =>
+              new Promise((resolve, reject) => 
+                client.getObject(li).then(lio => {
+                  this._augment(lio, li);
+                  resolve(lio);
+                }, reject))
+            )
+          );
         },
-
         import: async function(url){
           var path = `${folder}${uuidv4()}`;
           
@@ -401,8 +420,18 @@ var Graphs = {
           }
         },
 
-        list: function(){
-          return [...this];
+        list: async function(){
+          var listing = await client.getListing(folder);
+          
+          return Promise.all(
+            Object.keys(listing).map(li =>
+              new Promise((resolve, reject) => 
+                client.getObject(li).then(lio => {
+                  this._augment(lio, li);
+                  resolve(lio);
+                }, reject))
+            )
+          );
         },
 
         store: function(graph){
