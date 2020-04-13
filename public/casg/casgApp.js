@@ -467,16 +467,24 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.caching.enable('/ownPublicKeys/');
     $scope.RS.caching.enable('/othersPublicKeys/');
     $scope.RS.caching.enable('/public/');
-    
-    $scope.fetchAll();
-  });
 
-  $scope.fetchAll = async function(){
-    $scope.keyPairs = await $scope.RS.keyPairs.list();
-    $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
-    $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
-    $scope.$apply();
-  }
+    $scope.RS.onChange('/keyPairs/', () => {
+      $scope.keyPairs = await $scope.RS.keyPairs.list();
+      $scope.$apply();
+    });
+    $scope.RS.onChange('/ownPublicKeys/', () => {
+      $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+      $scope.$apply();
+    });
+    $scope.RS.onChange('/othersPublicKeys/', () => {
+      $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
+      $scope.$apply();
+    });
+    $scope.RS.onChange('/public/', () => {
+      $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+      $scope.$apply();
+    })
+  });
 
   $scope.clearStorage = function(){
     var ok = confirm("This will delete all storage!!! All Storage!!! Continue?");
@@ -509,8 +517,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   $scope.RS.on('disconnected', () => {
     console.debug('disconnected');
   });
-
-  $scope.RS.remote.onChange($scope.fetchAll);
 
   $scope.storageWidget = new Widget($scope.RS, {leaveOpen: true, skipInitial: true});
   $scope.configureStorage = function(){
