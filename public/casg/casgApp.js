@@ -254,14 +254,10 @@ var OwnPublicKeys = {
           var path = `${folder}${keyPair.name}`;
 
           return new Promise((resolve, reject) => {
-            client.getObject(path).then(shared => {
-              if(!shared){
-                client.storeObject('casg-ownpublickey', path, {
-                  title: keyPair.title,
-                  publicKeyArmored: keyPair.publicKeyArmored
-                });    
-              }
-
+            client.storeObject('casg-ownpublickey', path, {
+              title: keyPair.title,
+              publicKeyArmored: keyPair.publicKeyArmored
+            }).then(() => {
               var url = client.getItemURL(path);
               keyPair.publicUrl = url;
 
