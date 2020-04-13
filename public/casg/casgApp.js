@@ -122,19 +122,10 @@ var KeyPairs = {
 
         list: async function(){
           return await new Promise((resolve, reject) => {  
-            client.getAll('', false).then(objects => {
-              console.log(objects);
-              var arr = [];
-
-              for(var key in objects){
-                console.log(key);
-                objects[key].name = key;
-                this._augment(objects[key], key.toString());
-                arr.push(objects[key]);
-              }
-
-              resolve(arr);
-            }, reject);
+            client.getAll('', false).then(objects => resolve(Object.keys(objects).map((key) => {
+              this._augment(objects[key], key);
+              return objects[key];
+            })))
           });
         },
 
