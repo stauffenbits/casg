@@ -457,7 +457,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   $scope.othersPublicKeys = [];
 
   $scope.RS.on('ready', async function(){
-    $scope.RS.access.claim('*', 'rw');
     $scope.RS.access.claim('keyPairs', 'rw');
     $scope.RS.access.claim('ownPublicKeys', 'rw');
     $scope.RS.access.claim('othersPublicKeys', 'rw');
@@ -467,6 +466,11 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.caching.enable('/ownPublicKeys/');
     $scope.RS.caching.enable('/othersPublicKeys/');
     $scope.RS.caching.enable('/public/');
+
+    $scope.RS.caching.set('/keyPairs/', 'ALL');
+    $scope.RS.caching.set('/ownPublicKeys/', 'ALL');
+    $scope.RS.caching.set('/othersPublicKeys/', 'ALL');
+    $scope.RS.caching.set('/public/', 'ALL');
 
     $scope.RS.onChange('/keyPairs/', async () => {
       $scope.keyPairs = await $scope.RS.keyPairs.list();
