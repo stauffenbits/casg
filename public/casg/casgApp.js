@@ -140,10 +140,11 @@ var KeyPairs = {
           
           return Promise.all(
             Object.keys(listing).map(li =>
-              client.getObject(li).then(lio => {
-                this._augment(lio, li);
-                return lio;
-              })
+              new Promise((resolve, reject) => 
+                client.getObject(li).then(lio => {
+                  this._augment(lio, li);
+                  resolve(lio);
+                }, reject))
             )
           );
         },
