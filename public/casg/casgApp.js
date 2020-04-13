@@ -119,23 +119,9 @@ var KeyPairs = {
 
     return {
       exports: {
-        [Symbol.iterator]: function(){
-          return this._generator();
-        },
-
-        _generator: async function*(){
-          var listing = await client.getListing(`${folder}`, false);
-
-          for(var li of Object.keys(listing)){
-            var lio = await client.getObject(li.toString());
-            this._augment(lio, li);
-
-            yield lio;
-          }
-        },
 
         list: async function(){
-          var listing = await client.getListing(``, false);
+          var listing = await client.getListing(`/`, false);
           
           if(!listing){
             return [];
@@ -243,7 +229,7 @@ var OwnPublicKeys = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing('', false);
+          var listing = await client.getListing('/', false);
           
           if(!listing){
             return [];
@@ -316,7 +302,7 @@ var OthersPublicKeys = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing('', false);
+          var listing = await client.getListing('/', false);
           
           if(!listing){
             return [];
@@ -408,23 +394,8 @@ var Graphs = {
 
     return {
       exports: {
-        [Symbol.iterator]: function(){
-          return this._generator();
-        },
-
-        _generator: async function*(){
-          var listing = await client.getListing(folder, false);
-
-          for(var li of Object.keys(listing)){
-            var lio = await client.getObject(li);
-            this._augment(lio, li);
-
-            yield lio;
-          }
-        },
-
         list: async function(){
-          var listing = await client.getListing(folder, false);
+          var listing = await client.getListing('/', false);
           
           if(!listing){
             return [];
@@ -550,18 +521,16 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     }
 
     var c = $scope.RS.scope('/');
-    ['/key/', '/public/'].forEach(path => {
-      c.getListing(path, false).then(listing => {
-        if(!listing){
-          return;
-        }
+    c.getListing('/', false).then(listing => {
+      if(!listing){
+        return;
+      }
 
-        Object.keys(listing).forEach(li => {
-          c.remove(li);
-        });
+      Object.keys(listing).forEach(li => {
+        c.remove(li);
       });
-    })
-
+    });
+    
     $scope.RS.caching.reset();
   }
   
