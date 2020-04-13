@@ -222,7 +222,7 @@ var OwnPublicKeys = {
       exports: {
         list: async function(){
           return await new Promise((resolve, reject) => {  
-            client.getAll('/', false).then(objects => {
+            client.getAll('', false).then(objects => {
               var arr = [];
 
               for(var key in objects){
@@ -285,7 +285,7 @@ var OthersPublicKeys = {
       exports: {
         list: async function(){
           return await new Promise((resolve, reject) => {  
-            client.getAll('/othersPublicKeys/', false).then(objects => {
+            client.getAll('', false).then(objects => {
               var arr = [];
 
               for(var key in objects){
@@ -368,7 +368,7 @@ var Graphs = {
       exports: {
         list: async function(){
           return await new Promise((resolve, reject) => {  
-            client.getAll('/othersPublicKeys/', false).then(objects => {
+            client.getAll('', false).then(objects => {
               var arr = [];
 
               for(var key in objects){
