@@ -625,7 +625,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     }
 
     var url = await $scope.RS.ownpublickeys.share(key);
-    $scope.remoteStorage.startSync();
     
     $scope.publicKeyUrls[key.title] = url;
 
