@@ -7,333 +7,6 @@ function uuidv4() {
   );
 }
 
-var Graphs = {
-  name: 'graphs',
-  builder: function(privateClient, publicClient){
-
-    privateClient.declareType('casg', {
-      'type': 'object',
-      'properties': {
-        'title': {
-          'type': 'string',
-          'default': 'Title'
-        },
-        'vertices': {
-          'type': 'array',
-          'default': []
-        },
-        'edges': {
-          'type': 'array',
-          'default': []
-        },
-        'time': { // command history
-          'type': 'array',
-          'default': []
-        }
-      },
-      'required': ['title']
-    });
-
-    return {
-      exports: {
-
-        storeFile: function(mimeType, name, data) {    
-          return privateClient.storeFile(mimeType, name, data)
-            .then(function() {
-              return this.getFileURL(name);
-            }.bind(this));
-        },    
-
-        list: function(){
-          var self = this;
-
-          return privateClient.getListing('')
-            .then((listing) => {
-              if(listing){
-                self._removeDirectoryKeysFromListing(listing);
-                return listing;
-              }else{
-                return {};
-              }
-            })
-        },
-
-        getFileURL(name){
-          return privateClient.getItemURL(name);
-        },
-
-        _removeDirectoryKeysFromListing: function(listing) {
-          Object.keys(listing).forEach(function(key){
-            if (key.match(/\/$/)) {
-              delete listing[key];
-            }
-          });
-          return listing;
-        }
-      }
-    }
-  }
-};
-
-var KeyPairs = {
-  name: 'keypairs',
-  builder: function(privateClient, publicClient){
-    privateClient.declareType('keypair', {
-      'type': 'object',
-      'properties': {
-        'title': {
-          'type': 'string',
-          'default': 'Untitled Key Pair'
-        },
-        'privateKeyArmored': {
-          'type': 'string'
-        },
-        'publicKeyArmored': {
-          'type': 'string'
-        },
-        'revocationCertificate': {
-          'type': 'string'
-        }
-      },
-      'required': ['title']
-    });
-
-    return {
-      exports: {
-
-        store: function(key){
-          var path = `/casg/keypairs/${key.title}`;
-          return privateClient.storeObject('keypair', path, key);
-        },
-
-        list: function(){
-          var self = this;
-
-          return privateClient.getListing('/')
-            .then((listing) => {
-              console.log('keypair listing')
-              if(listing){
-                self._removeDirectoryKeysFromListing(listing);
-                return listing;
-              }else{
-                return {};
-              }
-            })
-        },
-
-        clear(){
-          this.list().then(listing => {
-            if(listing){
-              Object.keys(listing).forEach(li => {
-                privateClient.remove(li);
-              })
-            }
-          })
-        },
-
-        get: function(title){
-          var path = `/casg/keypairs/${title}`;
-          return privateClient.getObject(path);
-        },
-
-        remove: function(title){
-          var path = `/casg/keypairs/${title}`;
-          return privateClient.remove(path);
-        },
-
-        _removeDirectoryKeysFromListing: function(listing) {
-          Object.keys(listing).forEach(function(key){
-            if (key.match(/\/$/)) {
-              delete listing[key];
-            }
-          });
-
-          return listing;
-        }
-      }
-    }
-  }
-};
-
-var OwnPublicKeys = {
-  name: 'ownpublickeys',
-  builder: function(privateClient, publicClient){
-    publicClient.declareType('ownpublickey', {
-      'type': 'object',
-      'properties': {
-        'title': {
-          'type': 'string'
-        },
-        'publicKeyArmored': {
-          'type': 'string'
-        }
-      }, 
-      'required': ['title', 'publicKeyArmored']
-    });
-
-    return {
-      exports: {
-        share: async function(key){
-          var self = this;
-          var path = uuidv4();
-
-          await publicClient
-          .storeObject('ownpublickey', path, {
-            title: key.title,
-            publicKeyArmored: key.publicKeyArmored
-          })
-      
-          return publicClient.getItemURL(path);  
-        },
-
-        list: async function(){
-          var self = this;
-          var titleUrls = {};
-
-          return publicClient.getListing('/public/casg/ownpublickeys/')
-          .then(async (listing) => {
-            if(listing){
-              self._removeDirectoryKeysFromListing(listing);
-
-              await Promise.all(
-                Object.keys(listing).map(li => {
-                  return new Promise((resolve, reject) => {
-                    publicClient.getObject(li).then(publicKey => {
-                      try{
-                        titleUrls[publicKey.title] = publicClient.getItemURL(li);
-                      }catch(e){
-                        reject(e)
-                      }
-                    })
-                    resolve();
-                  })
-                })
-              );
-
-              return titleUrls;
-            }else{
-              return {};
-            }
-          })
-        },
-
-        _removeDirectoryKeysFromListing: function(listing) {
-          Object.keys(listing).forEach(function(key){
-            if (key.match(/\/$/)) {
-              delete listing[key];
-            }
-          });
-
-          return listing;
-        }
-      }
-    }
-  }
-}
-
-var OthersPublicKeys = {
-  name: 'otherspublickeys',
-  builder: function(privateClient, publicClient){
-    privateClient.declareType('otherspublickey', {
-      'type': 'object',
-      'properties': {
-        'title': {
-          'type': 'string'
-        },
-        'publicKeyArmored': {
-          'type': 'string'
-        }
-      }, 
-      'required': ['title', 'publicKeyArmored']
-    });
-
-    return {
-      exports: {
-        store: function(key, $scope){
-          return new Promise(async (resolve, reject) => {
-            var encryptedTitle = await $scope.pgp.encrypt(key.title, [$scope.currentKeyPair.publicKeyArmored]);
-            var encryptedKey = await $scope.pgp.encrypt(JSON.stringify(key.publicKeyArmored), [$scope.currentKeyPair.publicKeyArmored]);
-
-            privateClient
-            .storeObject('otherspublickey', `/casg/otherspublickeys/${key.title}`, {
-              title: encryptedTitle,
-              publicKeyArmored: encryptedKey
-            })
-            .then(resolve, reject)
-          })
-        },
-
-        getAll: function($scope){
-          var self = this;
-
-          return privateClient.getListing('/casg/otherspublickeys/')
-            .then(async (listing) => {
-              if(listing){
-                self._removeDirectoryKeysFromListing(listing);
-
-                var publicKeys = {};
-                await Promise.all(
-                  Object.keys(listing).map(li => new Promise((resolve, reject) => {
-                    privateClient.getObject(li).then(publicKey => {
-                      publicKeys[li] = publicKey;
-
-                      var decryptedTitle = $scope.pgp.decrypt(publicKey.title, $scope.currentKeyPair.publicKeyArmored);
-                      var decryptedKey = $scope.pgp.decrypt(publicKey.publicKeyArmored, $scope.currentKeyPair.publicKeyArmored);
-
-                      resolve({
-                        title: decryptedTitle,
-                        publicKeyArmored: decryptedKey                        
-                      });
-                    }, reject);
-                  }))
-                );
-
-                return publicKeys;
-              }else{
-                return {};
-              }
-            });
-        },
-
-        list: function(){
-          var self = this;
-
-          return privateClient.getListing('/casg/otherspublickeys/')
-            .then(async (listing) => {
-              if(listing){
-                self._removeDirectoryKeysFromListing(listing);
-
-                var titleUrls = {};
-                await Promise.all(
-                  Object.keys(listing).map(li => new Promise((resolve, reject) => {
-                    privateClient.getObject(li).then(publicKey => {
-                      titleUrls[li] = publicKey;
-                      resolve(url);
-                    }, reject);
-                  }))
-                );
-
-                return titleUrls;
-              }else{
-                return {};
-              }
-            })
-        },
-
-        _removeDirectoryKeysFromListing: function(listing) {
-          Object.keys(listing).forEach(function(key){
-            if (key.match(/\/$/)) {
-              delete listing[key];
-            }
-          });
-
-          return listing;
-        }
-      }
-    }
-  }
-}
-
 class PGPLoader {
   constructor(){
     this.privateKey = null;
@@ -418,36 +91,385 @@ class PGPLoader {
   }
 }
 
+var KeyPairs = {
+  name: 'keyPairs',
+  builder: function(privateClient, publicClient){    
+    var client = privateClient;
+    var folder = '/casg/KeyPairs/';
+    var pgp = new PGPLoader();
+
+    client.declareType('casg-keypair', {
+      'type': 'object',
+      'properties': {
+        'title': {
+          'type': 'string',
+          'default': 'Untitled Key Pair'
+        },
+        'privateKeyArmored': {
+          'type': 'string'
+        },
+        'publicKeyArmored': {
+          'type': 'string'
+        },
+        'revocationCertificate': {
+          'type': 'string'
+        }
+      },
+      'required': ['title', 'privateKeyArmored', 'publicKeyArmored', 'revocationCertificate']
+    });
+
+    return {
+      exports: {
+        [Symbol.iterator]: function(){
+          return this._generator();
+        },
+
+        _generator: async function*(){
+          var listing = await client.getListing(folder);
+
+          for(var li of Object.keys(listing)){
+            var lio = await client.getObject(li.toString());
+            this._augment(lio, li);
+
+            yield lio;
+          }
+        },
+
+        list: async function(){
+          var listing = await client.getListing(folder);
+          
+          return Promise.all(
+            Object.keys(listing).map(li =>
+              client.getObject(li).then(lio => {
+                this._augment(lio, li);
+                return lio;
+              })
+            )
+          );
+        },
+
+        store: function(keyPair){
+          var file = uuidv4();
+          var path = `${folder}${file}`;
+          client.storeObject('casg-keypair', path, keyPair);
+          this._augment(keyPair, path);
+
+          return keyPair;
+        },
+
+        _augmentPGP: function(lio){
+          Object.assign(lio, {
+            encrypt: async function(text, to, phrase){
+              pgp.setKey(lio, phrase);
+              return await pgp.encrypt(text, to);
+            },
+  
+            decrypt: async function(ciphertext, from, phrase){
+              pgp.setKey(lio, phrase);
+              return await pgp.decrypt(ciphertext, from);
+            }
+          });
+        },
+
+        _augmentIO: function(lio, li){
+          Object.assign(lio, {
+            remove: function(){
+              client.remove(li);
+            }
+          });
+
+          return lio;
+        },
+
+        _augment: function(lio, li){
+          this._augmentPGP(lio);
+          this._augmentIO(lio, li);
+          Object.assign(lio, {
+            name: li.slice(li.lastIndexOf('/'))
+          });
+
+          return lio;
+        },
+
+        create: async function(name, email, phrase){
+          var privateKey = await openpgp.generateKey({ 
+            curve: 'curve25519',  
+            userIds: [{ 
+              'name': name,
+              'email': email
+            }],
+            'passphrase': phrase
+          });          
+          privateKey.title = `${name} <${email}`;
+
+          return await this.store(privateKey)
+        }
+      }
+    }
+  }
+};
+
+var OwnPublicKeys = {
+  name: 'ownPublicKeys',
+  builder: function(privateClient, publicClient){
+    var client = publicClient;
+    var folder = '/casg/OwnPublicKeys/';
+
+    client.declareType('casg-ownpublickey', {
+      'type': 'object',
+      'properties': {
+        'title': {
+          'type': 'string',
+          'default': 'Untitled Public Key'
+        },
+        'publicKeyArmored': {
+          'type': 'string'
+        }
+      },
+      'required': ['title', 'publicKeyArmored']
+    });
+
+    return {
+      exports: {
+        [Symbol.iterator]: function(){
+          return this._generator();
+        },
+
+        _generator: async function*(){
+          var listing = await client.getListing(folder);
+
+          for(var li of Object.keys(listing)){
+            var lio = await client.getObject(li);
+            this._augment(lio, li);
+
+            yield lio;
+          }
+        },
+
+        list: function(){
+          return [...this];
+        },
+
+        share: function(keyPair){
+          var path = `${folder}${keyPair.name}`;
+
+          return new Promise((resolve, reject) => {
+            client.getObject(path).then(shared => {
+              if(!shared){
+                client.storeObject('casg-ownpublickey', path, {
+                  title: keyPair.title,
+                  publicKeyArmored: keyPair.publicKeyArmored
+                });    
+              }
+
+              var url = client.getItemURL(path);
+              keyPair.publicUrl = url;
+
+              resolve(url);
+            }, reject);
+          });
+        },
+
+        remove: function(keyPair){
+          var path = `${folder}${keyPair.name}`;
+          client.remove(path);
+        }
+      }
+    }
+  }
+};
+
+var OthersPublicKeys = {
+  name: 'othersPublicKeys',
+  builder: function(privateClient, publicClient){
+    var client = privateClient;
+    var folder = '/casg/OthersPublicKeys/';
+
+    client.declareType('casg-otherspublickey', {
+      'type': 'object',
+      'properties': {
+        'title': {
+          'type': 'string',
+          'default': 'Untitled Public Key'
+        },
+        'publicKeyArmored': {
+          'type': 'string'
+        }
+      },
+      'required': ['title', 'publicKeyArmored']
+    });
+    
+
+    return {
+      exports: {
+        [Symbol.iterator]: function(){
+          return this._generator();
+        },
+
+        _generator: async function*(){
+          var listing = await client.getListing(folder);
+
+          for(var li of Object.keys(listing)){
+            var lio = await client.getObject(li);
+            this._augment(lio, li);
+
+            yield lio;
+          }
+        },
+
+        list: function(){
+          return [...this];
+        },
+
+        import: async function(url){
+          var path = `${folder}${uuidv4()}`;
+          
+          return new Promise((resolve, reject) => {
+            $.get(url, {}, (data, status) => {
+              var key = {
+                title: data.title,
+                publicKeyArmored: data.publicKeyArmored
+              };
+
+              client.storeObject('casg-ownpublickey', path, key);
+              this._augment(key, path);
+
+              resolve(key);
+            });
+          })
+        },
+
+        _augmentIO: function(lio, li){
+          lio.remove = function(){
+            client.remove(li);
+          }
+
+          return lio;
+        },
+
+        _augment: function(lio, li){
+          this._augmentIO(lio, li);
+          lio.name = li.slice(li.lastIndexOf('/'));
+
+          return lio;
+        }
+      }
+    }
+  }
+};
+
+var Graphs = {
+  name: 'graphs',
+  builder: function(privateClient, publicClient){
+    var client = privateClient;
+    var folder = '/casg/graphs/';
+    var pgp = new PGPLoader();
+    
+    privateClient.declareType('casg-graph', {
+      'type': 'object',
+      'properties': {
+        'title': {
+          'type': 'string',
+          'default': 'Untitled Graph'
+        },
+
+        'description': {
+          'type': 'string',
+          'default': ''
+        },
+
+        'commands': {
+          'type': 'array',
+          'default': []
+        }
+
+      },
+      'required': ['title', 'commands']
+    });
+
+    return {
+      exports: {
+        [Symbol.iterator]: function(){
+          return this._generator();
+        },
+
+        _generator: async function*(){
+          var listing = await client.getListing(folder);
+
+          for(var li of Object.keys(listing)){
+            var lio = await client.getObject(li);
+            this._augment(lio, li);
+
+            yield lio;
+          }
+        },
+
+        list: function(){
+          return [...this];
+        },
+
+        store: function(graph){
+          var file = uuidv4()
+          var path = `${folder}${file}`;
+          client.storeObject('casg-graph', path, graph);
+
+          return path;
+        },
+
+        create: function(title, description, commands){
+          var path = `${folder}${uuidv4()}`;
+          var privateKey = this.store({
+            title,
+            description,
+            commands
+          });
+          this._augment(privateKey, path);
+
+          return privateKey;
+        },
+
+        _augmentIO: function(lio, li){
+          lio.remove = function(){
+            client.remove(li);
+          };
+
+          lio.clone = function(){
+            return client.create(lio.title, lio.description, lio.commands);
+          };
+
+          lio.share = async function(privateKey, to, phrase){
+            var encrypted = privateKey.encrypt(JSON.stringify({
+              title: lio.title,
+              description: lio.description, 
+              commands: lio.commands           
+            }), to, phrase);
+
+            var path = `${folder}${uuidv4}`;
+            
+            await publicClient.storeFile('text', path, encrypted)
+            var url = publicClient.getItemURL(path);
+
+            return url;
+          };
+        },
+
+        _augment: function(lio, li){
+          this._augmentPGP(lio);
+          this._augmentIO(lio, li);
+          lio.name = li.slice(li.lastIndexOf('/'));
+        }
+      }
+    }
+  }
+};
+
 var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function($scope, $http){
   // RemoteStorage Variables and Functions
   $('[data-toggle="tooltip"]').tooltip();
-
-  $scope.clearKeyPairs = function(){
-    $scope.remoteStorage.keypairs.clear();    
-    $scope.privateKeys = {};
-    $scope.$apply();
-  }
-
-  $scope.pgp = new PGPLoader();
-
   $scope.currentKeyPair = null;
-  $scope.privateKeys = {}; // title -> key
-  $scope.publicKeys = {}; // title -> key
-  $scope.publicKeyUrls = {}; // title -> url
 
-  $scope.storeKeyPair = function(privateKey){
-    $scope.remoteStorage.keypairs.store(privateKey);
-    if($scope.userAddress){
-      $scope.remoteStorage.startSync();
-    }
-
-    $scope.privateKeys[privateKey.title] = privateKey;
-    $scope.$apply();
-  }
-
-  $scope.userAddress = null;
-  $scope.remoteStorage = new RemoteStorage({
-    modules: [ Graphs, KeyPairs, OwnPublicKeys, OthersPublicKeys ],
+  $scope.RS = new RemoteStorage({
+    modules: [ KeyPairs, OwnPublicKeys, OthersPublicKeys ],
     cache: true,
     changeEvents: {
       local:    true,
@@ -457,110 +479,90 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     }
   });
 
-  $scope.remoteStorage.on('ready', function(){
-    $scope.userAddress = $scope.remoteStorage.remote.userAddress;
-    $scope.$apply();
+  $scope.keyPairs = [];
+  $scope.ownPublicKeys = [];
+  $scope.othersPublicKeys = [];
 
-    $scope.remoteStorage.access.claim('casg', 'rw');
-    $scope.remoteStorage.access.claim('public', 'rw');
+  $scope.RS.on('ready', function(){
+    $scope.RS.access.claim('*', 'rw');
+    $scope.RS.access.claim('casg', 'rw');
+    $scope.RS.access.claim('public', 'rw');
 
-    $scope.remoteStorage.caching.enable('/casg/');
-    $scope.remoteStorage.caching.enable('/public/')
-
-    $scope.loadKeyPairs();
-
-    $scope.remoteStorage.ownpublickeys.list()
-    .then(titleUrls => {
-      $scope.publicKeyUrls = titleUrls;
-      $scope.$apply();
-    })
-
-    $scope.remoteStorage.otherspublickeys.getAll($scope)
-    .then(keys => {
-      $scope.publicKeys = keys;
-      $scope.$apply();
-    })
+    $scope.RS.caching.enable('/casg/');
+    $scope.RS.caching.enable('/public/')
+    
+    /*
+    $scope.keyPairs = $scope.RS.keyPairs.list();
+    $scope.ownPublicKeys = $scope.RS.ownPublicKeys.list();
+    $scope.othersPublicKeys = $scope.RS.othersPublicKeys.list();
+    */
   })
+
+  $scope.clearStorage = function(){
+    var c = $scope.RS.scope('/');
+    ['/casg/', '/public/'].forEach(path => {
+      c.getListing(path).then(listing => {
+        Object.keys(listing).forEach(li => {
+          c.remove(li);
+        });
+      });
+    })
+  }
   
-  $scope.remoteStorage.on('network-offline', () => {
+  $scope.RS.on('network-offline', () => {
     console.debug(`We're offline now.`);
   });
   
-  $scope.remoteStorage.on('network-online', () => {
+  $scope.RS.on('network-online', () => {
     console.debug(`Hooray, we're back online.`);
   });
 
-  $scope.remoteStorage.on('disconnected', () => {
+  $scope.RS.on('disconnected', () => {
     console.debug('disconnected');
-
-    $scope.userAddress = null;
   })
 
-  $scope.storageWidget = new Widget($scope.remoteStorage);
+  $scope.storageWidget = new Widget($scope.RS);
   $scope.configureStorage = function(){
-    $scope.storageWidget.attach('remote-storage-configuration');
+    if(document.querySelector('remote-storage-configuration>*') == undefined){
+      $scope.storageWidget.attach('remote-storage-configuration');
+    }
   }
 
   // OpenPGP.js Variables and Functions
 
+  $scope.namePrompt = "Please enter your name for the key pair: ";
+  $scope.emailPrompt = "Please enter your email for the key pair: ";
+  $scope.phrasePrompt = "Please enter a passphrase for the key pair: ";
+
   $scope.generateKeyPair = async function(){
+    /*
     var confirmation = confirm("Creating a new Key Pair means you will re-encrypt all files and shares. Would you like to continue?")
     if(!confirmation){
       console.error('aborted');
       return;
     }
-    
-    var name = prompt("Please enter your name for the key pair: ");
+    */
+
+    var name = prompt($scope.namePrompt);
     if(!name){
       console.error('aborted');
       return;
     }
 
-    var email = prompt("Please enter your email for the key pair: ");
+    var email = prompt($scope.emailPrompt);
     if(!email){
       console.error('aborted');
       return;
     }
 
-    var pass = prompt("Please enter a passphrase for the key pair: ")
-    if(!pass){
+    var phrase = prompt($scope.phrasePrompt)
+    if(!phrase){
       console.error('aborted');
       return;
     }
-
-    // { privateKeyArmored, publicKeyArmored, revocationCertificate }
-    var privateKey = await openpgp.generateKey({ 
-      curve: 'curve25519',  
-      userIds: [{ 
-        name: name,
-        email: email
-      }],
-      passphrase: pass
-    });
-
-    privateKey.title = `${name} <${email}>`;
-
-    $scope.storeKeyPair(privateKey);
-
-    if(!$scope.currentKeyPair){
-      $scope.currentKeyPair = privateKey;
-      $scope.pgp.setKey($scope.currentKeyPair.privateKeyArmored, pass);
-    }
-  }
-
-  $scope.activateKeyPair = function(title){
-    var pass = prompt("Please enter the key pair's passpharse: ");
-    if(!pass){
-      console.error("aborted");
-      return;
-    }
-
-    $scope.currentKeyPair = $scope.privateKeys[title];
-    $scope.pgp.setKey($scope.currentKeyPair.privateKeyArmored, pass)
-  }
-
-  $scope.deactivateKeyPair = function(title){
-    $scope.currentKeyPair = null;
+    
+    var keyPair = await $scope.RS.keyPairs.create(name, email, phrase);
+    $scope.keyPairs.push(keyPair);
   }
 
   $scope.exportKeyPair = function(privateKey){
@@ -575,30 +577,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     link.click();
   }
 
-
-  $scope.loadKeyPairs = async function(){
-    console.log("loading key pairs")
-
-    var listing = await $scope.remoteStorage.keypairs.list();
-    console.log('listing: ', listing);
-    for(var keyPath in listing){
-      $scope.remoteStorage.keypairs.get(keyPath)
-      .then(privateKey => {
-        console.log('fetching', keyPath);
-        
-        $scope.privateKeys[privateKey.title] = privateKey;
-        $scope.$apply();
-      });
-
-      // i still can't get over the fact that 
-    }
-  }
-
-  $scope.removeKeyPair = function(title){
-    $scope.remoteStorage.keypairs.remove(title)
-    delete $scope.privateKeys[title];
-  }
-
   $scope.importKeyPair = function(){
     var f = document.querySelector('#key-pair-upload').files[0]
     var r = new FileReader();
@@ -607,7 +585,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       var data = e.target.result;
       var privateKey = JSON.parse(data);
 
-      $scope.storeKeyPair(privateKey);
+      $scope.RS.keyPairs.store(privateKey);
       $scope.$apply();
     }
 
@@ -621,7 +599,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       return;
     }
 
-    var url = await $scope.remoteStorage.ownpublickeys.share(key);
+    var url = await $scope.RS.ownpublickeys.share(key);
     $scope.remoteStorage.startSync();
     
     $scope.publicKeyUrls[key.title] = url;

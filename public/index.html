@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
     <title>CASG - Collect Aggregate Share Graphs</title>
+
     <!-- General dependencies -->
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="angular.min.js"></script>
@@ -15,7 +16,6 @@
     <script type="text/javascript" src="popper.min.js"></script>
     <script type="text/javascript" src="bootstrap.min.js"></script>
     <script type="text/javascript" src="ui-bootstrap-tpls.js"></script>
-
 
     <!-- fourd dependencies -->
     <script type="text/javascript" src="fourd/r90.three.min.js"></script>
@@ -48,37 +48,47 @@
 
           <hr>
           <ul>
-            <label>Storage</label>
+            <label>Storage Management</label>
             <!-- <li><a href="#" ng-click="clearAll()">Clear All Storage</a></li> -->
-            <li><a ng-if="userAddress" ng-href="#" ng-click="configureStorage()">{{userAddress}}</a></li>
-            <li><a ng-if="!userAddress" href="#" ng-click="configureStorage()">Configure RemoteStorage</a></li>
+            <li><a ng-if="RS.remote.userAddress" ng-href="#" ng-click="configureStorage();">{{RS.remote.userAddress}}</a></li>
+            <li><a ng-if="!RS.remote.userAddress" href="#" ng-click="configureStorage()">Configure RemoteStorage</a></li>
             <li id="remote-storage-configuration"></li>
+            <li><a ng-if="RS.remote.userAddress" ng-href="#" ng-click="clearStorage()">Clear Storage</a></li>
+
+            <li><a ng-if="RS.remote.userAddress" ng-href="#" ng-click="RS.disconnect()"></a></li>
           </ul>
           
           <ul>
             <a href="#" ng-click="generateKeyPair()" data-toggle="tooltip" title="Generate Key Pair">+</a>
             <a href="/uploadKeyPair" data-toggle="tooltip" title="Import Key Pair">↑</a>
             <a href="#" ng-click="clearKeyPairs()" data-toggle="tooltip" title="Delete all Key Pairs">✗</a>
-            <a href="/importPublicKey" ng-click="importPublicKey()" data-toggle="tooltop" title="Import Public Key">←</a>
+            <a href="/importPublicKey" ng-click="importPublicKey()" data-toggle="tooltip" title="Import Public Key">←</a>
             <label>Key Management</label>
 
             <ul class="itemList">
               <label>Private Keys</label>
-              <li ng-repeat="(title, privateKey) in privateKeys">
-                <a href="#" data-toggle="tooltip" title="Activate Key Pair" ng-if="!currentKeyPair || currentKeyPair.title != title" ng-click="activateKeyPair(title)">&#128275;</a>
-                <a href="#" data-toggle="tooltip" title="Deactivate Key Pair" ng-if="currentKeyPair.title == title" href="#" ng-click="deactivateKeyPair(title)">&#128274;</a>
-                <a href="#" data-toggle="tooltip" title="Shared Public Key URL" ng-if="Object.keys(publicKeyUrls).indexOf(privateKey.title) > -1" target="_blank" ng-href="{{publicKeyUrls[privateKey.title]}}">&#128279;</a>
-                <a href="#" data-toggle="tooltip" title="Export Public Key to Device" ng-click="exportKeyPair(privateKey)">↓</a>
-                <a href="#" data-toggle="tooltip" title="Share Public Key to Cloud" ng-click="sharePublicKey(privateKey)">→</a>
-                <a href="#" data-toggle="tooltip" title="Remove Key Pair" ng-click="removeKeyPair(title)">✗</a>
-                {{title}}
+              <li ng-repeat="keyPair in keyPairs">
+                <a href="#" data-toggle="tooltip" title="Activate Key Pair" ng-if="!currentKeyPair != keyPair" ng-click="currentKeyPair = keyPair">&#128275;</a>
+                <a href="#" data-toggle="tooltip" title="Deactivate Key Pair" ng-if="currentKeyPair == keyPair" href="#" ng-click="currentKeyPair = null">&#128274;</a>
+                <a href="#" data-toggle="tooltip" title="Shared Public Key URL" ng-if="keyPair.publicUrl" target="_blank" ng-href="{{keyPair.url}}">&#128279;</a>
+                <a href="#" data-toggle="tooltip" title="Export Public Key to Device" ng-click="exportKeyPair(keyPair)">↓</a>
+                <a href="#" data-toggle="tooltip" title="Share Public Key to Cloud" ng-click="RS.ownPublicKeys.share(keyPair)">→</a>
+                <a href="#" data-toggle="tooltip" title="Remove Key Pair" ng-click="keyPair.remove()">✗</a>
+                {{keyPair.title}}
               </li>
             </ul>
 
             <ul>
-              <label>Public Keys</label>
-              <li ng-repeat="(title, publicKey) in publicKeys">
-                {{title}}
+              <label>Own Public Keys</label>
+              <li ng-repeat="publicKey in ownPublicKeys">
+                {{publicKey.title}}
+              </li>
+            </ul>
+
+            <ul>
+              <label>Others' Public Keys</label>
+              <li ng-repeat="publicKey in othersPublicKeys">
+                {{publicKey.title}}
               </li>
             </ul>
           </ul>
