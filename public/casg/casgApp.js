@@ -142,7 +142,7 @@ var KeyPairs = {
             return [];
           }
           
-          return await Promise.all(
+          return (await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
@@ -154,7 +154,7 @@ var KeyPairs = {
                   }
                 }, reject))
             )
-          );
+          )).filter((lio) => lio);
         },
 
         store: function(keyPair){
@@ -257,12 +257,12 @@ var OwnPublicKeys = {
 
         list: async function(){
           var listing = await client.getListing(folder);
-                  
+          
           if(!listing){
             return [];
           }
-
-          return await Promise.all(
+          
+          return (await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
@@ -274,7 +274,7 @@ var OwnPublicKeys = {
                   }
                 }, reject))
             )
-          );
+          )).filter((lio) => lio);
         },
 
         share: function(keyPair){
@@ -346,8 +346,8 @@ var OthersPublicKeys = {
           if(!listing){
             return [];
           }
-
-          return await Promise.all(
+          
+          return (await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
@@ -359,8 +359,9 @@ var OthersPublicKeys = {
                   }
                 }, reject))
             )
-          );
+          )).filter((lio) => lio);
         },
+
         import: async function(url){
           var path = `${folder}${uuidv4()}`;
           
@@ -450,8 +451,8 @@ var Graphs = {
           if(!listing){
             return [];
           }
-
-          return await Promise.all(
+          
+          return (await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
@@ -463,7 +464,7 @@ var Graphs = {
                   }
                 }, reject))
             )
-          );
+          )).filter((lio) => lio);
         },
 
         store: function(graph){
