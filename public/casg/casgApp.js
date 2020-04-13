@@ -594,8 +594,8 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   }
 
   $scope.exportToWeb = async function(keyPair){
-    await $scope.RS.ownPublicKeys.share(keyPair);
-    $scope.ownPublicKeys = $scope.RS.ownPublicKeys.list();
+    var publicKey = await $scope.RS.ownPublicKeys.share(keyPair);
+    $scope.ownPublicKeys.push(publicKey);
     $scope.$apply();
   }
 
