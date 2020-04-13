@@ -510,10 +510,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     console.debug('disconnected');
   });
 
-  $scope.RS.on('change', () => {
-
-    $scope.fetchAll();
-  })
+  $scope.RS.remote.onChange($scope.fetchAll);
 
   $scope.storageWidget = new Widget($scope.RS, {leaveOpen: true, skipInitial: true});
   $scope.configureStorage = function(){
