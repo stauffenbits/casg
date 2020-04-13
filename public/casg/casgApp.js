@@ -644,7 +644,11 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   }
 
   $scope.clearKeyPairs = function(){
+    $scope.keyPairs.forEach(keyPair){
+      keyPair.remove();
+    }
 
+    $scope.$apply();
   }
 
   $scope.clearAll = function(){
