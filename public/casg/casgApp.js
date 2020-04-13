@@ -122,7 +122,7 @@ var KeyPairs = {
 
         list: async function(){
           return await new Promise((resolve, reject) => {  
-            client.getAll('/othersPublicKeys/', false).then(objects => {
+            client.getAll('/', false).then(objects => {
               var arr = [];
 
               for(var key in objects){
@@ -174,7 +174,7 @@ var KeyPairs = {
           this._augmentPGP(lio);
           this._augmentIO(lio, li);
           Object.assign(lio, {
-            name: li.slice(li.lastIndexOf('/'))
+            name: li
           });
 
           return lio;
