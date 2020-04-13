@@ -222,11 +222,7 @@ var OwnPublicKeys = {
 
         isShared: function(keyPair){
           var path = keyPair.name;
-          try{
-            var url = client.getItemUrl(path)
-          }catch(e){
-            var url = false;
-          }
+          var url = client.getItemUrl(path);
 
           keyPair.publicUrl = url;
           return url;
