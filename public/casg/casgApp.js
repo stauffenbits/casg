@@ -143,17 +143,21 @@ var KeyPairs = {
           }
           
           return (await Promise.all(
-            Object.keys(listing).map(li =>
-              new Promise((resolve, reject) => 
-                client.getObject(li).then(lio => {
-                  if(lio){
-                    this._augment(lio, li);
-                    resolve(lio);
-                  }else{
-                    resolve(null)
-                  }
-                }, reject))
-            )
+            Object.keys(listing).map(li => {
+              if(li){
+                return new Promise((resolve, reject) =>
+                  client.getObject(li).then(lio => {
+                    if(lio){
+                      this._augment(lio, li);
+                      resolve(lio);
+                    }else{
+                      resolve(null)
+                    }
+                  }, reject))
+              }else{
+                return null;
+              }
+            })
           )).filter((lio) => lio);
         },
 
