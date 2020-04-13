@@ -138,6 +138,10 @@ var KeyPairs = {
         list: async function(){
           var listing = await client.getListing(folder);
           
+          if(!listing){
+            return [];
+          }
+          
           return await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
@@ -253,7 +257,11 @@ var OwnPublicKeys = {
 
         list: async function(){
           var listing = await client.getListing(folder);
-          
+                  
+          if(!listing){
+            return [];
+          }
+
           return await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
@@ -335,6 +343,10 @@ var OthersPublicKeys = {
         list: async function(){
           var listing = await client.getListing(folder);
           
+          if(!listing){
+            return [];
+          }
+
           return await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
@@ -435,6 +447,10 @@ var Graphs = {
         list: async function(){
           var listing = await client.getListing(folder);
           
+          if(!listing){
+            return [];
+          }
+
           return await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
