@@ -615,13 +615,13 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   $scope.removeKeyPair = function(keyPair){
     keyPair.remove();
     $scope.keyPairs = await $scope.RS.keyPairs.list();
-    $scope.$apply();
+    // $scope.$apply();
   }
 
   $scope.removePublicKeyListing = function(key){
     key.remove();
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
-    $scope.$apply();
+    // $scope.$apply();
   }
 
   $scope.sharePublicKey = async function(key){
