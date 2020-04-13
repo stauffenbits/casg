@@ -131,7 +131,7 @@ var KeyPairs = {
             Object.keys(listing).map(li => {
               if(li){
                 return new Promise((resolve, reject) =>
-                  client.getObject(li).then(lio => {
+                  client.getObject(li, false).then(lio => {
                     if(lio){
                       this._augment(lio, li);
                       resolve(lio);
@@ -239,7 +239,7 @@ var OwnPublicKeys = {
             Object.keys(listing).map(li => {
               if(li){
                 return new Promise((resolve, reject) =>
-                  client.getObject(li).then(lio => {
+                  client.getObject(li, false).then(lio => {
                     if(lio){
                       this._augment(lio, li);
                       resolve(lio);
@@ -312,7 +312,7 @@ var OthersPublicKeys = {
             Object.keys(listing).map(li => {
               if(li){
                 return new Promise((resolve, reject) =>
-                  client.getObject(li).then(lio => {
+                  client.getObject(li, false).then(lio => {
                     if(lio){
                       this._augment(lio, li);
                       resolve(lio);
@@ -405,7 +405,7 @@ var Graphs = {
             Object.keys(listing).map(li => {
               if(li){
                 return new Promise((resolve, reject) =>
-                  client.getObject(li).then(lio => {
+                  client.getObject(li, false).then(lio => {
                     if(lio){
                       this._augment(lio, li);
                       resolve(lio);
