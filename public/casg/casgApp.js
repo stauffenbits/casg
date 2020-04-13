@@ -576,7 +576,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       return;
     }
     
-    var keyPair = $scope.RS.keyPairs.create(name, email, phrase);
+    var keyPair = await $scope.RS.keyPairs.create(name, email, phrase);
     $scope.keyPairs.push(keyPair);
     $scope.$apply();
   }
