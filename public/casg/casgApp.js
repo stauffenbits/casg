@@ -482,7 +482,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.caching.set('/othersPublicKeys/', 'ALL');
     $scope.RS.caching.set('/public/', 'ALL');
 
-    $scope.keyPairs = await $scope.RS.keyPairs.list();
+    $scope.keyPairs = $scope.RS.keyPairs.list();
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
     $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
@@ -492,7 +492,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
 
   $scope.RS.on('connected', async function(){
     $scope.RS.startSync();
-    $scope.keyPairs = await $scope.RS.keyPairs.list();
+    $scope.keyPairs = $scope.RS.keyPairs.list();
     console.log('fresh keyPairs', $scope.keyPairs);
 
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
@@ -574,7 +574,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       return;
     }
     
-    var keyPair = await $scope.RS.keyPairs.create(name, email, phrase);
+    var keyPair = $scope.RS.keyPairs.create(name, email, phrase);
     $scope.keyPairs.push(keyPair);
     $scope.$apply();
   }
@@ -606,7 +606,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       var privateKey = JSON.parse(data);
 
       $scope.RS.keyPairs.store(privateKey);
-      $scope.keyPairs.push(privateKey);
+      $scope.keyPairs = $scope.rs.keyPairs.list();
       $scope.$apply();
     }
 
@@ -615,7 +615,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
 
   $scope.removeKeyPair = async function(keyPair){
     keyPair.remove();
-    $scope.keyPairs = await $scope.RS.keyPairs.list();
+    $scope.keyPairs = $scope.RS.keyPairs.list();
     delete keyPair;
 
     $scope.$apply();
