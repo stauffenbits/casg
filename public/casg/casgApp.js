@@ -472,14 +472,18 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.caching.set('/othersPublicKeys/', 'ALL');
     $scope.RS.caching.set('/public/', 'ALL');
 
+
+  });
+
+  $scope.RS.on('connected', async function(){
     $scope.RS.startSync();
-  
     $scope.keyPairs = await $scope.RS.keyPairs.list();
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
     $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+
     $scope.$apply();
-  });
+  })
 
   /*
 
