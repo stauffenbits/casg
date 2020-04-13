@@ -558,9 +558,10 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     }
 
     ['/casg/', '/public/'].forEach(path => {
-      $scope.RS.getListing(path).then(listing => {
+      var c = $scope.RS.scope(path);
+      c.getListing(path).then(listing => {
         Object.keys(listing).forEach(li => {
-          $scope.RS.remove(li);
+          c.remove(li);
         });
       });
     })
