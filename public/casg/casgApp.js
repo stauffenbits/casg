@@ -126,6 +126,7 @@ var KeyPairs = {
               var arr = [];
 
               for(var key in objects){
+                console.log(key);
                 objects[key].name = key;
                 this._augment(objects[key], key.toString());
                 arr.push(objects[key]);
