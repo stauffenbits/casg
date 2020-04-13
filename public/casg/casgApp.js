@@ -142,8 +142,12 @@ var KeyPairs = {
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
-                  this._augment(lio, li);
-                  resolve(lio);
+                  if(lio){
+                    this._augment(lio, li);
+                    resolve(lio);
+                  }else{
+                    reject('not found')
+                  }
                 }, reject))
             )
           );
@@ -254,8 +258,12 @@ var OwnPublicKeys = {
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
-                  this._augment(lio, li);
-                  resolve(lio);
+                  if(lio){
+                    this._augment(lio, li);
+                    resolve(lio);
+                  }else{
+                    reject('not found')
+                  }
                 }, reject))
             )
           );
@@ -331,8 +339,12 @@ var OthersPublicKeys = {
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
-                  this._augment(lio, li);
-                  resolve(lio);
+                  if(lio){
+                    this._augment(lio, li);
+                    resolve(lio);
+                  }else{
+                    reject('not found')
+                  }
                 }, reject))
             )
           );
@@ -427,8 +439,12 @@ var Graphs = {
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
-                  this._augment(lio, li);
-                  resolve(lio);
+                  if(lio){
+                    this._augment(lio, li);
+                    resolve(lio);
+                  }else{
+                    reject('not found')
+                  }
                 }, reject))
             )
           );
