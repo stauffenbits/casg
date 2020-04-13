@@ -136,6 +136,9 @@ var KeyPairs = {
         },
 
         list: async function(){
+          var all = client.getAll(folder);
+          all.
+
           var listing = await client.getListing(folder);
           
           if(!listing){
@@ -557,7 +560,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       return;
     }
 
-
     var c = $scope.RS.scope('/');
     ['/casg/', '/public/'].forEach(path => {
       c.getListing(path).then(listing => {
@@ -570,6 +572,8 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
         });
       });
     })
+
+    $scope.RS.caching.reset();
   }
   
   $scope.RS.on('network-offline', () => {
