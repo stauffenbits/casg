@@ -547,9 +547,9 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.access.claim('casg', 'rw');
     $scope.RS.access.claim('public', 'rw');
     
-    $scope.keyPairs = $scope.RS.keyPairs.list();
-    $scope.ownPublicKeys = $scope.RS.ownPublicKeys.list();
-    $scope.othersPublicKeys = $scope.RS.othersPublicKeys.list();
+    $scope.keyPairs = await $scope.RS.keyPairs.list();
+    $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+    $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
   })
 
   $scope.clearStorage = function(){
