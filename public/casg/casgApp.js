@@ -487,11 +487,9 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.caching.enable('/casg/');
     $scope.RS.caching.enable('/public/')
     
-    /*
     $scope.keyPairs = $scope.RS.keyPairs.list();
     $scope.ownPublicKeys = $scope.RS.ownPublicKeys.list();
     $scope.othersPublicKeys = $scope.RS.othersPublicKeys.list();
-    */
   })
 
   $scope.clearStorage = function(){
