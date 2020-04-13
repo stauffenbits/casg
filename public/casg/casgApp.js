@@ -472,6 +472,11 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.caching.set('/othersPublicKeys/', 'ALL');
     $scope.RS.caching.set('/public/', 'ALL');
 
+    $scope.keyPairs = await $scope.RS.keyPairs.list();
+    $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+    $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
+    $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+    $scope.$apply();
 
   });
 
@@ -484,8 +489,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
 
     $scope.$apply();
   })
-
-  /*
 
   $scope.RS.onChange('/keyPairs/', async () => {
     $scope.keyPairs = await $scope.RS.keyPairs.list();
@@ -503,7 +506,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
     $scope.$apply();
   });
-  */
 
   $scope.clearStorage = function(){
     var ok = confirm("This will delete all storage!!! All Storage!!! Continue?");
