@@ -121,7 +121,7 @@ var KeyPairs = {
       exports: {
 
         list: async function(){
-          var listing = await client.getListing(`/`, false);
+          var listing = await client.getListing(`/keyPairs/`, false);
           
           if(!listing){
             return [];
@@ -229,7 +229,7 @@ var OwnPublicKeys = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing('/', false);
+          var listing = await client.getListing('/ownPublicKeys/', false);
           
           if(!listing){
             return [];
@@ -302,7 +302,7 @@ var OthersPublicKeys = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing('/', false);
+          var listing = await client.getListing('/othersPublicKeys/', false);
           
           if(!listing){
             return [];
@@ -395,7 +395,7 @@ var Graphs = {
     return {
       exports: {
         list: async function(){
-          var listing = await client.getListing('/', false);
+          var listing = await client.getListing('/graphs/', false);
           
           if(!listing){
             return [];
