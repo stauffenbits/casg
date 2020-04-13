@@ -125,7 +125,7 @@ var KeyPairs = {
         },
 
         _generator: async function*(){
-          var listing = await client.getListing(folder, false);
+          var listing = await client.getListing(`${client.base}${folder}`, false);
 
           for(var li of Object.keys(listing)){
             var lio = await client.getObject(li.toString());
@@ -136,7 +136,7 @@ var KeyPairs = {
         },
 
         list: async function(){
-          var listing = await client.getListing('', false);
+          var listing = await client.getListing(`${client.base}${folder}`, false);
           
           if(!listing){
             return [];
