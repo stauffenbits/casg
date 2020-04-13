@@ -515,7 +515,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     cache: false,
     changeEvents: {
       local:    true,
-      window:   true,
+      window:   false,
       remote:   true,
       conflict: true
     }
