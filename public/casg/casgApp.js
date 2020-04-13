@@ -267,17 +267,21 @@ var OwnPublicKeys = {
           }
           
           return (await Promise.all(
-            Object.keys(listing).map(li =>
-              new Promise((resolve, reject) => 
-                client.getObject(li).then(lio => {
-                  if(lio){
-                    this._augment(lio, li);
-                    resolve(lio);
-                  }else{
-                    resolve(null);
-                  }
-                }, reject))
-            )
+            Object.keys(listing).map(li => {
+              if(li){
+                return new Promise((resolve, reject) =>
+                  client.getObject(li).then(lio => {
+                    if(lio){
+                      this._augment(lio, li);
+                      resolve(lio);
+                    }else{
+                      resolve(null)
+                    }
+                  }, reject))
+              }else{
+                return null;
+              }
+            })
           )).filter((lio) => lio);
         },
 
@@ -352,17 +356,21 @@ var OthersPublicKeys = {
           }
           
           return (await Promise.all(
-            Object.keys(listing).map(li =>
-              new Promise((resolve, reject) => 
-                client.getObject(li).then(lio => {
-                  if(lio){
-                    this._augment(lio, li);
-                    resolve(lio);
-                  }else{
-                    resolve(null);
-                  }
-                }, reject))
-            )
+            Object.keys(listing).map(li => {
+              if(li){
+                return new Promise((resolve, reject) =>
+                  client.getObject(li).then(lio => {
+                    if(lio){
+                      this._augment(lio, li);
+                      resolve(lio);
+                    }else{
+                      resolve(null)
+                    }
+                  }, reject))
+              }else{
+                return null;
+              }
+            })
           )).filter((lio) => lio);
         },
 
@@ -457,17 +465,21 @@ var Graphs = {
           }
           
           return (await Promise.all(
-            Object.keys(listing).map(li =>
-              new Promise((resolve, reject) => 
-                client.getObject(li).then(lio => {
-                  if(lio){
-                    this._augment(lio, li);
-                    resolve(lio);
-                  }else{
-                    resolve(null)
-                  }
-                }, reject))
-            )
+            Object.keys(listing).map(li => {
+              if(li){
+                return new Promise((resolve, reject) =>
+                  client.getObject(li).then(lio => {
+                    if(lio){
+                      this._augment(lio, li);
+                      resolve(lio);
+                    }else{
+                      resolve(null)
+                    }
+                  }, reject))
+              }else{
+                return null;
+              }
+            })
           )).filter((lio) => lio);
         },
 
@@ -590,7 +602,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     console.debug('disconnected');
   })
 
-  $scope.storageWidget = new Widget($scope.RS);
+  $scope.storageWidget = new Widget($scope.RS, {leaveOpen: true, skipInitial: true});
   $scope.configureStorage = function(){
     if(document.querySelector('remote-storage-configuration>*') == undefined){
       $scope.storageWidget.attach('remote-storage-configuration');
