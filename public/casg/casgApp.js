@@ -250,8 +250,7 @@ var OwnPublicKeys = {
           Object.assign(lio, {
             remove: function(){
               client.remove(li);
-            },
-            name: li
+            }
           });
 
           return lio;
@@ -328,7 +327,7 @@ var OthersPublicKeys = {
 
         _augmentIO: function(lio, li){
           lio.remove = function(){
-            client.remove(li);
+            return client.remove(li);
           }
 
           return lio;
