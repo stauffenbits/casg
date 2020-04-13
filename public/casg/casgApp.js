@@ -138,7 +138,7 @@ var KeyPairs = {
         list: async function(){
           var listing = await client.getListing(folder);
           
-          return Promise.all(
+          return await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
@@ -250,7 +250,7 @@ var OwnPublicKeys = {
         list: async function(){
           var listing = await client.getListing(folder);
           
-          return Promise.all(
+          return await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
@@ -327,7 +327,7 @@ var OthersPublicKeys = {
         list: async function(){
           var listing = await client.getListing(folder);
           
-          return Promise.all(
+          return await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
@@ -423,7 +423,7 @@ var Graphs = {
         list: async function(){
           var listing = await client.getListing(folder);
           
-          return Promise.all(
+          return await Promise.all(
             Object.keys(listing).map(li =>
               new Promise((resolve, reject) => 
                 client.getObject(li).then(lio => {
@@ -496,7 +496,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
 
   $scope.RS = new RemoteStorage({
     modules: [ KeyPairs, OwnPublicKeys, OthersPublicKeys ],
-    cache: true,
+    cache: false,
     changeEvents: {
       local:    true,
       window:   true,
