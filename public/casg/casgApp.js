@@ -222,7 +222,7 @@ var OwnPublicKeys = {
   name: 'ownPublicKeys',
   builder: function(privateClient, publicClient){
     var client = publicClient;
-    var folder = '/casg/OwnPublicKeys/';
+    var folder = '/public/OwnPublicKeys/';
 
     client.declareType('casg-ownpublickey', {
       'type': 'object',
