@@ -49,13 +49,9 @@
           <hr>
           <ul>
             <label>Storage Management</label>
-            <!-- <li><a href="#" ng-click="clearAll()">Clear All Storage</a></li> -->
             <li><a ng-if="RS.remote.userAddress" ng-href="#" ng-click="configureStorage();">{{RS.remote.userAddress}}</a></li>
             <li><a ng-if="!RS.remote.userAddress" href="#" ng-click="configureStorage()">Configure RemoteStorage</a></li>
             <li id="remote-storage-configuration"></li>
-            <li><a ng-if="RS.remote.userAddress" ng-href="#" ng-click="clearStorage()">Clear Storage</a></li>
-
-            <li><a ng-if="RS.remote.userAddress" ng-href="#" ng-click="RS.disconnect()"></a></li>
           </ul>
           
           <ul>
