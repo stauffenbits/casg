@@ -563,6 +563,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     
     var keyPair = await $scope.RS.keyPairs.create(name, email, phrase);
     $scope.keyPairs.push(keyPair);
+    $scope.$apply();
   }
 
   $scope.exportKeyPair = function(privateKey){
