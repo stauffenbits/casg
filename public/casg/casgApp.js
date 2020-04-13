@@ -523,6 +523,11 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   })
 
   $scope.clearStorage = function(){
+    var ok = prompt("This will delete all storage!!! All Storage!!! Continue?");
+    if(!ok){
+      return;
+    }
+
     var c = $scope.RS.scope('/');
     ['/casg/', '/public/'].forEach(path => {
       c.getListing(path).then(listing => {
