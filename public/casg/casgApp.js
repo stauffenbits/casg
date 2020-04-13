@@ -227,8 +227,9 @@ var OwnPublicKeys = {
           }catch(e){
             var url = false;
           }
-          
+
           keyPair.publicUrl = url;
+          return url;
         },
 
         share: function(keyPair){
@@ -238,12 +239,12 @@ var OwnPublicKeys = {
             client.storeObject('casg-ownpublickey', path, {
               title: keyPair.title,
               publicKeyArmored: keyPair.publicKeyArmored
-            }).then(() => {
-              var url = client.getItemURL(path);
-              keyPair.publicUrl = url;
+            })
+          
+            var url = client.getItemURL(path);
+            keyPair.publicUrl = url;
 
-              resolve(url);
-            }, reject);
+            resolve(url);
           });
         },
 
