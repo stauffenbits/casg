@@ -262,6 +262,8 @@ var OwnPublicKeys = {
             name: li
           });
 
+          lio.publicUrl = client.getItemURL(li)
+
           return lio;
         }
       }
