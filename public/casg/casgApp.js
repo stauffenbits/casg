@@ -159,7 +159,7 @@ var KeyPairs = {
 
         store: function(keyPair){
           var file = uuidv4();
-          var path = `${file}`;
+          var path = `${folder}${file}`;
           client.storeObject('casg-keypair', path, keyPair);
           this._augment(keyPair, path);
 
@@ -362,7 +362,7 @@ var OthersPublicKeys = {
           );
         },
         import: async function(url){
-          var path = `${uuidv4()}`;
+          var path = `${folder}${uuidv4()}`;
           
           return new Promise((resolve, reject) => {
             $.get(url, {}, (data, status) => {
@@ -468,14 +468,14 @@ var Graphs = {
 
         store: function(graph){
           var file = uuidv4()
-          var path = `${file}`;
+          var path = `${folder}${file}`;
           client.storeObject('casg-graph', path, graph);
 
           return path;
         },
 
         create: function(title, description, commands){
-          var path = `${uuidv4()}`;
+          var path = `${folder}${uuidv4()}`;
           var privateKey = this.store({
             title,
             description,
