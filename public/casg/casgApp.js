@@ -233,15 +233,19 @@ var OwnPublicKeys = {
           var path = `${keyPair.name}`;
 
           return new Promise((resolve, reject) => {
-            client.storeObject('casg-ownpublickey', path, {
+            var publicKey = {
               title: keyPair.title,
               publicKeyArmored: keyPair.publicKeyArmored
-            })
+            };
+
+            client.storeObject('casg-ownpublickey', path, publicKey)
           
             var url = client.getItemURL(path);
             keyPair.publicUrl = url;
 
-            resolve(url);
+            this._augment(publicKey, path);
+
+            resolve();
           });
         },
 
@@ -249,7 +253,8 @@ var OwnPublicKeys = {
           Object.assign(lio, {
             remove: function(){
               client.remove(li);
-            }
+            },
+            name: li
           });
 
           return lio;
@@ -612,15 +617,16 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
 
   $scope.removeKeyPair = function(keyPair){
     $scope.keyPairs = $scope.keyPairs.slice($scope.keyPairs.indexOf(keyPair));
-    keyPair.remove();
-
     $scope.$apply();
+
+    keyPair.remove();
   }
 
   $scope.removePublicKeyListing = function(key){
     $scope.ownPublicKeys = $scope.ownPublicKeys.slice($scope.ownPublicKeys.indexOf(key));
-    key.remove();
     $scope.$apply();
+
+    key.remove();
   }
 
   $scope.sharePublicKey = async function(key){
