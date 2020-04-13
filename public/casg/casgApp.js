@@ -449,7 +449,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       remote:   true,
       conflict: true
     },
-    logging: true
+    logging: false
   });
 
   $scope.keyPairs = [];
