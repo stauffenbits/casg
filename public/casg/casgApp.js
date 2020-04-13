@@ -557,8 +557,9 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       return;
     }
 
+
+    var c = $scope.RS.scope('/');
     ['/casg/', '/public/'].forEach(path => {
-      var c = $scope.RS.scope(path);
       c.getListing(path).then(listing => {
         if(!listing){
           return;
