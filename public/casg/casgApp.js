@@ -601,7 +601,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     var f = document.querySelector('#key-pair-upload').files[0]
     var r = new FileReader();
 
-    r.onload = function(e){
+    r.onload = async function(e){
       var data = e.target.result;
       var privateKey = JSON.parse(data);
 
