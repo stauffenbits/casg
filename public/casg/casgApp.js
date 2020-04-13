@@ -223,6 +223,7 @@ var OwnPublicKeys = {
         isShared: function(keyPair){
           var path = keyPair.name;
           var url = client.getItemUrl(path);
+          console.log(url);
 
           keyPair.publicUrl = url;
           return url;
