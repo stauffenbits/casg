@@ -155,7 +155,7 @@ var KeyPairs = {
 
         store: function(keyPair){
           var file = uuidv4();
-          var path = `${folder}${file}`;
+          var path = `${file}`;
           client.storeObject('casg-keypair', path, keyPair);
           this._augment(keyPair, path);
 
@@ -270,7 +270,7 @@ var OwnPublicKeys = {
         },
 
         share: function(keyPair){
-          var path = `${folder}${keyPair.name}`;
+          var path = `${keyPair.name}`;
 
           return new Promise((resolve, reject) => {
             client.storeObject('casg-ownpublickey', path, {
@@ -286,7 +286,7 @@ var OwnPublicKeys = {
         },
 
         remove: function(keyPair){
-          var path = `${folder}${keyPair.name}`;
+          var path = `${keyPair.name}`;
           client.remove(path);
         }
       }
@@ -350,7 +350,7 @@ var OthersPublicKeys = {
           );
         },
         import: async function(url){
-          var path = `${folder}${uuidv4()}`;
+          var path = `${uuidv4()}`;
           
           return new Promise((resolve, reject) => {
             $.get(url, {}, (data, status) => {
@@ -452,14 +452,14 @@ var Graphs = {
 
         store: function(graph){
           var file = uuidv4()
-          var path = `${folder}${file}`;
+          var path = `${file}`;
           client.storeObject('casg-graph', path, graph);
 
           return path;
         },
 
         create: function(title, description, commands){
-          var path = `${folder}${uuidv4()}`;
+          var path = `${uuidv4()}`;
           var privateKey = this.store({
             title,
             description,
@@ -486,7 +486,7 @@ var Graphs = {
               commands: lio.commands           
             }), to, phrase);
 
-            var path = `${folder}${uuidv4}`;
+            var path = `${uuidv4}`;
             
             await publicClient.storeFile('text', path, encrypted)
             var url = publicClient.getItemURL(path);
