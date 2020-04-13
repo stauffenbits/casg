@@ -484,6 +484,13 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
       $scope.$apply();
     })
+
+  
+    $scope.keyPairs = await $scope.RS.keyPairs.list();
+    $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+    $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
+    $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+    $scope.$apply();
   });
 
   $scope.clearStorage = function(){
