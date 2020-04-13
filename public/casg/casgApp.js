@@ -523,7 +523,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   })
 
   $scope.clearStorage = function(){
-    var ok = prompt("This will delete all storage!!! All Storage!!! Continue?");
+    var ok = confirm("This will delete all storage!!! All Storage!!! Continue?");
     if(!ok){
       return;
     }
