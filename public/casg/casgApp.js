@@ -450,7 +450,7 @@ var Graphs = {
 var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function($scope, $http){
   // RemoteStorage Variables and Functions
   $('[data-toggle="tooltip"]').tooltip();
-  $scope.currentKeyPair = null;
+  $scope.currentKeyPair = {};
 
   $scope.RS = new RemoteStorage({
     modules: [ KeyPairs, OwnPublicKeys, OthersPublicKeys ],
