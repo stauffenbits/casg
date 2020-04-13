@@ -220,6 +220,17 @@ var OwnPublicKeys = {
           });
         },
 
+        isShared: function(keyPair){
+          var path = keyPair.name;
+          try{
+            var url = client.getItemUrl(path)
+          }catch(e){
+            var url = false;
+          }
+          
+          keyPair.publicUrl = url;
+        },
+
         share: function(keyPair){
           var path = `${keyPair.name}`;
 
