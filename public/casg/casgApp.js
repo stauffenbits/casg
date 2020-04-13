@@ -214,7 +214,7 @@ var OwnPublicKeys = {
         list: async function(){
           return await new Promise((resolve, reject) => {  
             client.getAll('', false).then(objects => resolve(Object.keys(objects).map((key) => {
-              // this._augment(objects[key], key);
+              this._augment(objects[key], key);
               return objects[key];
             })))
           });
@@ -243,6 +243,25 @@ var OwnPublicKeys = {
 
             resolve(url);
           });
+        },
+
+        _augmentIO: function(lio, li){
+          Object.assign(lio, {
+            remove: function(){
+              client.remove(li);
+            }
+          });
+
+          return lio;
+        },
+
+        _augment: function(lio, li){
+          this._augmentIO(lio, li);
+          Object.assign(lio, {
+            name: li
+          });
+
+          return lio;
         },
 
         remove: function(keyPair){
@@ -468,7 +487,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.caching.set('/public/', 'ALL');
 
     $scope.keyPairs = await $scope.RS.keyPairs.list();
-    console.log('first keyPairs', $scope.keyPairs);
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
     $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
