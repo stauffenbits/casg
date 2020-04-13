@@ -513,9 +513,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.RS.access.claim('*', 'rw');
     $scope.RS.access.claim('casg', 'rw');
     $scope.RS.access.claim('public', 'rw');
-
-    $scope.RS.caching.enable('/casg/');
-    $scope.RS.caching.enable('/public/')
     
     $scope.keyPairs = $scope.RS.keyPairs.list();
     $scope.ownPublicKeys = $scope.RS.ownPublicKeys.list();
