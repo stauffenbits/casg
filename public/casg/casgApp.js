@@ -188,7 +188,7 @@ var KeyPairs = {
             }],
             'passphrase': phrase
           });          
-          privateKey.title = `${name} <${email}`;
+          privateKey.title = `${name} <${email}>`;
 
           return await this.store(privateKey)
         }
