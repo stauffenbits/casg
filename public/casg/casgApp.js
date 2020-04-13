@@ -141,7 +141,6 @@ var KeyPairs = {
           var path = `${file}`;
           client.storeObject('casg-keypair', path, keyPair);
           this._augment(keyPair, path);
-          client.startSync();
 
           return keyPair;
         },
