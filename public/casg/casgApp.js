@@ -136,7 +136,7 @@ var KeyPairs = {
         },
 
         list: async function(){
-          var listing = await client.getListing(folder, false);
+          var listing = await client.getListing('', false);
           
           if(!listing){
             return [];
