@@ -214,7 +214,7 @@ var OwnPublicKeys = {
         list: async function(){
           return await new Promise((resolve, reject) => {  
             client.getAll('', false).then(objects => resolve(Object.keys(objects).map((key) => {
-              this._augment(objects[key], key);
+              // this._augment(objects[key], key);
               return objects[key];
             })))
           });
