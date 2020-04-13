@@ -73,7 +73,7 @@
                 <a href="#" data-toggle="tooltip" title="Shared Public Key URL" ng-if="keyPair.publicUrl" target="_blank" ng-href="{{keyPair.publicUrl}}">&#128279;</a>
                 <a href="#" data-toggle="tooltip" title="Export Public Key to Device" ng-click="exportKeyPair(keyPair)">↓</a>
                 <a href="#" data-toggle="tooltip" title="Share Public Key to Cloud" ng-click="RS.ownPublicKeys.share(keyPair)">→</a>
-                <a href="#" data-toggle="tooltip" title="Remove Key Pair" ng-click="keyPair.remove()">✗</a>
+                <a href="#" data-toggle="tooltip" title="Remove Key Pair" ng-click="removeKeyPair(keyPair)">✗</a>
                 {{keyPair.title}}
               </li>
             </ul>
