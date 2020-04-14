@@ -634,10 +634,12 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       console.error('aborted');
       return;
     }
-    await $scope.RS.othersPublicKeys.import(url);
-    $scope.othersPublicKeys = $scope.RS.othersPublicKeys.list();
-
-    $scope.$apply();
+    
+    var publicKey = await $scope.RS.othersPublicKeys.import(url);
+    if(publicKey){
+      $scope.othersPublicKeys.push(publicKey);
+      $scope.$apply();
+    }
   }
 
   $scope.clearKeyPairs = function(){
