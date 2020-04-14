@@ -295,17 +295,10 @@ var OthersPublicKeys = {
       exports: {
         list: async function(){
           return await new Promise((resolve, reject) => {  
-            client.getAll('', false).then(objects => {
-              var arr = [];
-
-              for(var key in objects){
-                objects[key].name = key;
-                this._augment(objects[key], key.toString());
-                arr.push(objects[key]);
-              }
-
-              resolve(arr);
-            })
+            client.getAll('', false).then(objects => resolve(Object.keys(objects).map((key) => {
+              this._augment(objects[key], key);
+              return objects[key];
+            })))
           });
         },
 
@@ -669,7 +662,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     publicKey.remove();
     delete $scope.othersPublicKeys[$scope.othersPublicKeys.indexOf(publicKey)];
     $scope.$apply();
-
   }
 }]);
 
