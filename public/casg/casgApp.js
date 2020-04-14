@@ -305,7 +305,7 @@ var OthersPublicKeys = {
         import: async function(url){
           return new Promise((resolve, reject) => {
             $.getJSON(url, {}, (data) => {
-              var path = url.slice(url.lastIndexOf('/'));
+              var path = url.substr(url.lastIndexOf('/'));
               var key = {
                 title: data.title,
                 publicKeyArmored: data.publicKeyArmored

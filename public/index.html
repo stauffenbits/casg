@@ -84,7 +84,7 @@
             <ul>
               <label>Others' Public Keys</label>
               <li ng-repeat="publicKey in othersPublicKeys">
-                <a href="#" ng-click="removeOthersPublicKey(publicKey)">✗</a>
+                <a href="#" data-toggle="tooltip" title="Remove Foreign Public Key" ng-click="removeOthersPublicKey(publicKey)">✗</a>
                 {{publicKey.title}}
               </li>
             </ul>
