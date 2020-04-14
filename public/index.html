@@ -77,14 +77,14 @@
               <label>Own Public Keys</label>
               <li ng-repeat="publicKey in ownPublicKeys">
                 <a href="#" data-toggle="tooltip" title="Delete Public Key Listing" ng-if="publicKey" ng-click="removePublicKeyListing(publicKey)">✗</a>
-                <a href="#" ng-href="{{publicKey.publicUrl}}">{{publicKey.title}}</a>
+                <a href="#" ng-href="{{publicKey.publicUrl}}" ng-if="publicKey">{{publicKey.title}}</a>
               </li>
             </ul>
 
             <ul>
               <label>Others' Public Keys</label>
               <li ng-repeat="publicKey in othersPublicKeys">
-                <a href="#" data-toggle="tooltip" title="Remove Foreign Public Key" ng-click="removeOthersPublicKey(publicKey)">✗</a>
+                <a href="#" data-toggle="tooltip" title="Remove Foreign Public Key" ng-if="publicKey" ng-click="removeOthersPublicKey(publicKey)">✗</a>
                 {{publicKey.title}}
               </li>
             </ul>
