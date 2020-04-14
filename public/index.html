@@ -55,17 +55,15 @@
           </ul>
           
           <ul>
-            <a href="#" ng-click="generateKeyPair()" data-toggle="tooltip" title="Generate Key Pair">+</a>
-            <a href="/uploadKeyPair" data-toggle="tooltip" title="Import Key Pair">↑</a>
-            <a href="#" data-toggle="tooltip" title="Import Public Key" ng-click="importPublicKey()">←</a>
             <label>Key Management</label>
 
             <ul class="itemList">
+              <a href="#" ng-click="generateKeyPair()" data-toggle="tooltip" title="Generate Key Pair">+</a>
+              <a href="/uploadKeyPair" data-toggle="tooltip" title="Import Key Pair">↑</a> 
               <label>Private Keys</label>
               <li ng-repeat="keyPair in keyPairs">
                 <a href="#" data-toggle="tooltip" title="Activate Key Pair" ng-if="keyPair && (!currentKeyPair != keyPair)" ng-click="currentKeyPair = keyPair">&#128275;</a>
                 <a href="#" data-toggle="tooltip" title="Deactivate Key Pair" ng-if="keyPair && (currentKeyPair == keyPair)" href="#" ng-click="currentKeyPair = null">&#128274;</a>
-                <a href="#" data-toggle="tooltip" title="Shared Public Key URL" ng-if="keyPair && ownPublicKeys.isShared(keyPair)" target="_blank" ng-href="{{keyPair.publicUrl}}">&#128279;</a>
                 <a href="#" data-toggle="tooltip" title="Export Public Key to Device" ng-if="keyPair" ng-click="exportToDevice(keyPair)">↓</a>
                 <a href="#" data-toggle="tooltip" title="Share Public Key to Web" ng-if="keyPair" ng-click="exportToWeb(keyPair)">→</a>
                 <a href="#" data-toggle="tooltip" title="Delete Key Pair" ng-if="keyPair" ng-click="removeKeyPair(keyPair)">✗</a>
@@ -82,6 +80,7 @@
             </ul>
 
             <ul>
+              <a href="#" data-toggle="tooltip" title="Import Foreign Public Key" ng-click="importPublicKey()">←</a>
               <label>Others' Public Keys</label>
               <li ng-repeat="publicKey in othersPublicKeys">
                 <a href="#" data-toggle="tooltip" title="Remove Foreign Public Key" ng-if="publicKey" ng-click="removeOthersPublicKey(publicKey)">✗</a>
