@@ -303,9 +303,11 @@ var OthersPublicKeys = {
         },
 
         import: async function(url){
-          return new Promise((resolve, reject) => {
+          return await new Promise((resolve, reject) => {
             $.getJSON(url, {}, (data) => {
-              var path = url.substr(url.lastIndexOf('/'));
+              var file = uuidv4();
+              var path = `${file}`;
+
               var key = {
                 title: data.title,
                 publicKeyArmored: data.publicKeyArmored
@@ -313,7 +315,6 @@ var OthersPublicKeys = {
               this._augment(key, path);
               client.storeObject('casg-otherspublickey', path, key);
               resolve(key);
-              return key;
             });
           })
         },
