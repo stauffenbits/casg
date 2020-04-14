@@ -17,5 +17,6 @@ li > a {
 }
 
 label {
+  padding-top: 3px;
   font-weight: bold;
 }

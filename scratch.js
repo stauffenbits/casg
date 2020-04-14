@@ -316,3 +316,21 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', async function($scope){
     // load keys
   }
 }]);
+
+
+$scope.RS.onChange('/keyPairs/', async () => {
+  $scope.keyPairs = await $scope.RS.keyPairs.list();
+  $scope.$apply();
+});
+$scope.RS.onChange('/ownPublicKeys/', async () => {
+  $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+  $scope.$apply();
+});
+$scope.RS.onChange('/othersPublicKeys/', async () => {
+  $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
+  $scope.$apply();
+});
+$scope.RS.onChange('/public/', async () => {
+  $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
+  $scope.$apply();
+});
