@@ -313,8 +313,7 @@ var OthersPublicKeys = {
           var path = `${uuidv4()}`;
           
           return new Promise((resolve, reject) => {
-            $.getJSON(url).then((data, status) => {
-              console.log(data)
+            $.getJSON(url, {}, (data) => {
               var key = {
                 title: data.title,
                 publicKeyArmored: data.publicKeyArmored
