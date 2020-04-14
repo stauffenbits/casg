@@ -14,3 +14,7 @@ li > a {
 .itemList > li {
   list-style-type: none;
 }
+
+label {
+  font-weight: bold;
+}
