@@ -310,10 +310,9 @@ var OthersPublicKeys = {
         },
 
         import: async function(url){
-          var path = `${uuidv4()}`;
-          
           return new Promise((resolve, reject) => {
             $.getJSON(url, {}, (data) => {
+              var path = url.slice(url.lastIndexOf('/'));
               var key = {
                 title: data.title,
                 publicKeyArmored: data.publicKeyArmored
@@ -642,8 +641,8 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     return url;
   };
 
-  $scope.importPublicKey = function(url){
-    var othersPublicKey = $scope.RS.othersPublicKeys.import(url);
+  $scope.importPublicKey = async function(url){
+    var othersPublicKey = await $scope.RS.othersPublicKeys.import(url);
     $scope.othersPublicKeys.push(othersPublicKey);
 
     $scope.$apply();
