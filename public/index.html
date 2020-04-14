@@ -59,9 +59,10 @@
 
             <ul class="itemList">
               <label>
+                Private Keys
                 <a href="#" ng-click="generateKeyPair()" data-toggle="tooltip" title="Generate Key Pair">+</a>
                 <a href="/uploadKeyPair" data-toggle="tooltip" title="Import Key Pair">↑</a> 
-                Private Keys
+
               </label>
               <li ng-repeat="keyPair in keyPairs">
                 <a href="#" data-toggle="tooltip" title="Activate Key Pair" ng-if="keyPair && (!currentKeyPair != keyPair)" ng-click="currentKeyPair = keyPair">&#128275;</a>
@@ -83,8 +84,8 @@
 
             <ul>
               <label>
-                <a href="#" data-toggle="tooltip" title="Import Foreign Public Key" ng-click="importPublicKey()">←</a>
                 Others' Public Keys
+                <a href="#" data-toggle="tooltip" title="Import Foreign Public Key" ng-click="importPublicKey()">←</a>
               </label>
               <li ng-repeat="publicKey in othersPublicKeys">
                 <a href="#" data-toggle="tooltip" title="Remove Foreign Public Key" ng-if="publicKey" ng-click="removeOthersPublicKey(publicKey)">✗</a>
