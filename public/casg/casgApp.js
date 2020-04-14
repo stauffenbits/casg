@@ -329,8 +329,7 @@ var OthersPublicKeys = {
 
         _augment: function(lio, li){
           this._augmentIO(lio, li);
-          lio.name = li.slice(li.lastIndexOf('/'));
-
+          lio.name = li;
           return lio;
         }
       }
