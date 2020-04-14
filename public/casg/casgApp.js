@@ -644,7 +644,10 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   };
 
   $scope.importPublicKey = function(url){
-    $scope.RS.othersPublicKeys.import(url);
+    var othersPublicKey = $scope.RS.othersPublicKeys.import(url);
+    $scope.othersPublicKeys.push(othersPublicKey);
+
+    $scope.$apply();
   }
 
   $scope.clearKeyPairs = function(){
