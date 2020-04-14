@@ -310,9 +310,10 @@ var OthersPublicKeys = {
                 title: data.title,
                 publicKeyArmored: data.publicKeyArmored
               };
+              this._augment(key, path);
 
               client.storeObject('casg-otherspublickey', path, key);
-              this._augment(key, path);
+              
 
               resolve(key);
             });
