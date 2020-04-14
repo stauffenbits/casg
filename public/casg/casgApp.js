@@ -432,6 +432,7 @@ var Graphs = {
             
             await publicClient.storeFile('text', path, encrypted)
             var url = publicClient.getItemURL(path);
+            console.log(url)
 
             return url;
           };
