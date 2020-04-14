@@ -490,7 +490,6 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
     $scope.$apply();
-
   });
 
   $scope.RS.on('connected', async function(){
@@ -644,10 +643,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
   };
 
   $scope.importPublicKey = function(url){
-    $http.get(url).then((response) => {
-      console.log(response.data);
-      $scope.remoteStorage.otherspublickeys.store(response.data, $scope);
-    })
+    $scope.RS.othersPublicKeys.import(url);
   }
 
   $scope.clearKeyPairs = function(){
