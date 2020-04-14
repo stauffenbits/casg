@@ -633,7 +633,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       console.error('aborted');
       return;
     }
-    var publicKey = await $scope.RS.othersPublicKeys.import(url);
+    await $scope.RS.othersPublicKeys.import(url);
     $scope.othersPublicKeys = $scope.RS.othersPublicKeys.list();
 
     $scope.$apply();
