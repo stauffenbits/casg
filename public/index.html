@@ -65,8 +65,8 @@
 
               </label>
               <li ng-repeat="keyPair in keyPairs">
-                <a href="#" data-toggle="tooltip" title="Activate Key Pair" ng-if="keyPair && (currentKeyPair != keyPair)" ng-click="currentKeyPair = keyPair">&#128275;</a>
-                <a href="#" data-toggle="tooltip" title="Deactivate Key Pair" ng-if="keyPair && (currentKeyPair == keyPair)" href="#" ng-click="currentKeyPair = null">&#128274;</a>
+                <a href="#" data-toggle="tooltip" title="Activate Key Pair" ng-if="keyPair && (currentKeyPair != keyPair)" ng-click="setCurrentKeyPair(keyPair)">&#128275;</a>
+                <a href="#" data-toggle="tooltip" title="Deactivate Key Pair" ng-if="keyPair && (currentKeyPair == keyPair)" href="#" ng-click="setCurrentKeyPair(null)">&#128274;</a>
                 <a href="#" data-toggle="tooltip" title="Export Public Key to Device" ng-if="keyPair" ng-click="exportToDevice(keyPair)">↓</a>
                 <a href="#" data-toggle="tooltip" title="Share Public Key to Web" ng-if="keyPair" ng-click="exportToWeb(keyPair)">→</a>
                 <a href="#" data-toggle="tooltip" title="Delete Key Pair" ng-if="keyPair" ng-click="removeKeyPair(keyPair)">✗</a>
