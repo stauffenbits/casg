@@ -651,7 +651,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.remoteStorage.disconnect();
   }
 
-  $scope.removeOthersPublicKey = function(publicKey){
+  $scope.removeOthersPublicKey = async function(publicKey){
     publicKey.remove();
     delete $scope.othersPublicKeys[$scope.othersPublicKeys.indexOf(publicKey)];
   }
