@@ -58,9 +58,11 @@
             <label>Key Management</label>
 
             <ul class="itemList">
-              <a href="#" ng-click="generateKeyPair()" data-toggle="tooltip" title="Generate Key Pair">+</a>
-              <a href="/uploadKeyPair" data-toggle="tooltip" title="Import Key Pair">↑</a> 
-              <label>Private Keys</label>
+              <label>
+                <a href="#" ng-click="generateKeyPair()" data-toggle="tooltip" title="Generate Key Pair">+</a>
+                <a href="/uploadKeyPair" data-toggle="tooltip" title="Import Key Pair">↑</a> 
+                Private Keys
+              </label>
               <li ng-repeat="keyPair in keyPairs">
                 <a href="#" data-toggle="tooltip" title="Activate Key Pair" ng-if="keyPair && (!currentKeyPair != keyPair)" ng-click="currentKeyPair = keyPair">&#128275;</a>
                 <a href="#" data-toggle="tooltip" title="Deactivate Key Pair" ng-if="keyPair && (currentKeyPair == keyPair)" href="#" ng-click="currentKeyPair = null">&#128274;</a>
