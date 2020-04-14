@@ -446,6 +446,7 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
 
   $scope.setCurrentKeyPair = function(keyPair){
     $scope.currentKeyPair = keyPair;
+    $scope.$apply();
   }
 
   $scope.RS = new RemoteStorage({
