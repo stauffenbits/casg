@@ -311,11 +311,9 @@ var OthersPublicKeys = {
                 publicKeyArmored: data.publicKeyArmored
               };
               this._augment(key, path);
-
               client.storeObject('casg-otherspublickey', path, key);
-              
-
               resolve(key);
+              return key;
             });
           })
         },
@@ -480,19 +478,14 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
     $scope.keyPairs = await $scope.RS.keyPairs.list();
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
     $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
-    $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
     $scope.$apply();
   });
 
   $scope.RS.on('connected', async function(){
     $scope.RS.startSync();
     $scope.keyPairs = await $scope.RS.keyPairs.list();
-    console.log('fresh keyPairs', $scope.keyPairs);
-
     $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
     $scope.othersPublicKeys = await $scope.RS.othersPublicKeys.list();
-    $scope.ownPublicKeys = await $scope.RS.ownPublicKeys.list();
-
     $scope.$apply();
   })
 
@@ -640,8 +633,8 @@ var MainCtrl = casgApp.controller('MainCtrl', ['$scope', '$http', async function
       console.error('aborted');
       return;
     }
-    var othersPublicKey = await $scope.RS.othersPublicKeys.import(url);
-    $scope.othersPublicKeys.push(othersPublicKey);
+    var publicKey = await $scope.RS.othersPublicKeys.import(url);
+    $scope.othersPublicKeys.push(publicKey);
 
     $scope.$apply();
   }
